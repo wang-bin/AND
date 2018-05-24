@@ -1,0 +1,3 @@
+[submodule "classes/jmi"]
+	path = jmi
+	url = https://github.com/wang-bin/JMI.git
