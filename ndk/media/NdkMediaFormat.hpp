@@ -30,70 +30,70 @@ void AMediaFormat_setString(AMediaFormat*, const char* name, const char* value);
 void AMediaFormat_setBuffer(AMediaFormat*, const char* name, void* data, size_t size);
 
 // constexpr
-extern const char* AMEDIAFORMAT_KEY_AAC_DRC_ATTENUATION_FACTOR;
-extern const char* AMEDIAFORMAT_KEY_AAC_DRC_BOOST_FACTOR;
-extern const char* AMEDIAFORMAT_KEY_AAC_DRC_HEAVY_COMPRESSION;
-extern const char* AMEDIAFORMAT_KEY_AAC_DRC_TARGET_REFERENCE_LEVEL;
-extern const char* AMEDIAFORMAT_KEY_AAC_ENCODED_TARGET_LEVEL;
-extern const char* AMEDIAFORMAT_KEY_AAC_MAX_OUTPUT_CHANNEL_COUNT;
-extern const char* AMEDIAFORMAT_KEY_AAC_PROFILE;
-extern const char* AMEDIAFORMAT_KEY_AAC_SBR_MODE;
-extern const char* AMEDIAFORMAT_KEY_AUDIO_SESSION_ID;
-extern const char* AMEDIAFORMAT_KEY_BITRATE_MODE;
-extern const char* AMEDIAFORMAT_KEY_BIT_RATE;
-extern const char* AMEDIAFORMAT_KEY_CAPTURE_RATE;
-extern const char* AMEDIAFORMAT_KEY_CHANNEL_COUNT;
-extern const char* AMEDIAFORMAT_KEY_CHANNEL_MASK;
-constexpr static  const char* AMEDIAFORMAT_KEY_COLOR_FORMAT = "color-format";
-extern const char* AMEDIAFORMAT_KEY_COLOR_RANGE;
-extern const char* AMEDIAFORMAT_KEY_COLOR_STANDARD;
-extern const char* AMEDIAFORMAT_KEY_COLOR_TRANSFER;
-extern const char* AMEDIAFORMAT_KEY_COMPLEXITY;
-extern const char* AMEDIAFORMAT_KEY_CSD;
+constexpr static const char* AMEDIAFORMAT_KEY_AAC_DRC_ATTENUATION_FACTOR = "aac-drc-cut-level"; // 21
+constexpr static const char* AMEDIAFORMAT_KEY_AAC_DRC_BOOST_FACTOR = "aac-drc-boost-level"; //21
+constexpr static const char* AMEDIAFORMAT_KEY_AAC_DRC_HEAVY_COMPRESSION = "aac-drc-heavy-compression"; // 21
+constexpr static const char* AMEDIAFORMAT_KEY_AAC_DRC_TARGET_REFERENCE_LEVEL = "aac-target-ref-level"; // 21
+constexpr static const char* AMEDIAFORMAT_KEY_AAC_ENCODED_TARGET_LEVEL = "aac-encoded-target-level"; // 21
+constexpr static const char* AMEDIAFORMAT_KEY_AAC_MAX_OUTPUT_CHANNEL_COUNT = "aac-max-output-channel_count"; // 21
+constexpr static const char* AMEDIAFORMAT_KEY_AAC_PROFILE = "aac-profile"; // 16
+constexpr static const char* AMEDIAFORMAT_KEY_AAC_SBR_MODE = "aac-sbr-mode"; // 21
+constexpr static const char* AMEDIAFORMAT_KEY_AUDIO_SESSION_ID = "audio-session-id"; // 21
+constexpr static const char* AMEDIAFORMAT_KEY_BITRATE_MODE = "bitrate-mode"; // 21
+constexpr static const char* AMEDIAFORMAT_KEY_BIT_RATE = "bitrate"; // 16
+constexpr static const char* AMEDIAFORMAT_KEY_CAPTURE_RATE = "capture-rate"; // 21
+constexpr static const char* AMEDIAFORMAT_KEY_CHANNEL_COUNT = "channel-count";
+constexpr static const char* AMEDIAFORMAT_KEY_CHANNEL_MASK = "channel-mask"; // 16
+constexpr static const char* AMEDIAFORMAT_KEY_COLOR_FORMAT = "color-format";
+constexpr static const char* AMEDIAFORMAT_KEY_COLOR_RANGE = "color-range"; // 24, int
+constexpr static const char* AMEDIAFORMAT_KEY_COLOR_STANDARD = "color-standard"; // 24, int
+constexpr static const char* AMEDIAFORMAT_KEY_COLOR_TRANSFER = "color-transfer"; // 24, int
+constexpr static const char* AMEDIAFORMAT_KEY_COMPLEXITY = "complexity"; // 21
+constexpr static const char* AMEDIAFORMAT_KEY_CSD = "csd";
 constexpr static const char* AMEDIAFORMAT_KEY_CSD_0 = "csd-0";
 constexpr static const char* AMEDIAFORMAT_KEY_CSD_1 = "csd-1";
 constexpr static const char* AMEDIAFORMAT_KEY_CSD_2 = "csd-2";
 extern const char* AMEDIAFORMAT_KEY_DISPLAY_CROP;
 extern const char* AMEDIAFORMAT_KEY_DISPLAY_HEIGHT;
 extern const char* AMEDIAFORMAT_KEY_DISPLAY_WIDTH;
-extern const char* AMEDIAFORMAT_KEY_DURATION;
-extern const char* AMEDIAFORMAT_KEY_FLAC_COMPRESSION_LEVEL;
-extern const char* AMEDIAFORMAT_KEY_FRAME_RATE;
+constexpr static const char* AMEDIAFORMAT_KEY_DURATION = "durationUs"; // 16
+constexpr static const char* AMEDIAFORMAT_KEY_FLAC_COMPRESSION_LEVEL = "flac-compression-level"; // 16, int 0~8
+constexpr static const char* AMEDIAFORMAT_KEY_FRAME_RATE = "frame-rate"; // 16, int/float
 extern const char* AMEDIAFORMAT_KEY_GRID_COLUMNS;
 extern const char* AMEDIAFORMAT_KEY_GRID_ROWS;
-extern const char* AMEDIAFORMAT_KEY_HDR_STATIC_INFO;
+constexpr static const char* AMEDIAFORMAT_KEY_HDR_STATIC_INFO = "hdr-static-info"; // 24
 constexpr static const char* AMEDIAFORMAT_KEY_HEIGHT = "height";
-extern const char* AMEDIAFORMAT_KEY_INTRA_REFRESH_PERIOD;
-extern const char* AMEDIAFORMAT_KEY_IS_ADTS;
-extern const char* AMEDIAFORMAT_KEY_IS_AUTOSELECT;
-extern const char* AMEDIAFORMAT_KEY_IS_DEFAULT;
-extern const char* AMEDIAFORMAT_KEY_IS_FORCED_SUBTITLE;
-extern const char* AMEDIAFORMAT_KEY_I_FRAME_INTERVAL;
-extern const char* AMEDIAFORMAT_KEY_LANGUAGE;
-extern const char* AMEDIAFORMAT_KEY_LATENCY;
-extern const char* AMEDIAFORMAT_KEY_LEVEL;
-extern const char* AMEDIAFORMAT_KEY_MAX_HEIGHT;
+constexpr static const char* AMEDIAFORMAT_KEY_INTRA_REFRESH_PERIOD = "intra-refresh-period"; // 24
+constexpr static const char* AMEDIAFORMAT_KEY_IS_ADTS = "is-adts";
+constexpr static const char* AMEDIAFORMAT_KEY_IS_AUTOSELECT = "is-autoselect"; // 19
+constexpr static const char* AMEDIAFORMAT_KEY_IS_DEFAULT = "is-default";
+constexpr static const char* AMEDIAFORMAT_KEY_IS_FORCED_SUBTITLE = "is-forced-subtitle"; // 19
+constexpr static const char* AMEDIAFORMAT_KEY_I_FRAME_INTERVAL = "i-frame-interval"; // 16
+constexpr static const char* AMEDIAFORMAT_KEY_LANGUAGE = "language"; // 19
+constexpr static const char* AMEDIAFORMAT_KEY_LATENCY = "latency"; // 26
+constexpr static const char* AMEDIAFORMAT_KEY_LEVEL = "level"; // 23, enc
+constexpr static const char* AMEDIAFORMAT_KEY_MAX_HEIGHT = "max-height"; // 19
 constexpr static const char* AMEDIAFORMAT_KEY_MAX_INPUT_SIZE = "max-input-size";
-extern const char* AMEDIAFORMAT_KEY_MAX_WIDTH;
+constexpr static const char* AMEDIAFORMAT_KEY_MAX_WIDTH = "max-width"; // 19
 constexpr static const char* AMEDIAFORMAT_KEY_MIME = "mime";
 extern const char* AMEDIAFORMAT_KEY_MPEG_USER_DATA;
-extern const char* AMEDIAFORMAT_KEY_OPERATING_RATE;
-extern const char* AMEDIAFORMAT_KEY_PCM_ENCODING;
-extern const char* AMEDIAFORMAT_KEY_PRIORITY;
-extern const char* AMEDIAFORMAT_KEY_PROFILE;
-extern const char* AMEDIAFORMAT_KEY_PUSH_BLANK_BUFFERS_ON_STOP;
-extern const char* AMEDIAFORMAT_KEY_REPEAT_PREVIOUS_FRAME_AFTER;
-extern const char* AMEDIAFORMAT_KEY_ROTATION;
-extern const char* AMEDIAFORMAT_KEY_SAMPLE_RATE;
+constexpr static const char* AMEDIAFORMAT_KEY_OPERATING_RATE = "operating-rate";
+constexpr static const char* AMEDIAFORMAT_KEY_PCM_ENCODING = "pcm-encoding";
+extern const char* AMEDIAFORMAT_KEY_PRIORITY; // 23
+constexpr static const char* AMEDIAFORMAT_KEY_PROFILE = "profile"; // 21
+constexpr static const char* AMEDIAFORMAT_KEY_PUSH_BLANK_BUFFERS_ON_STOP = "push-blank-buffers-on-shutdown"; // 19
+constexpr static const char* AMEDIAFORMAT_KEY_REPEAT_PREVIOUS_FRAME_AFTER = "repeat-previous-frame-after"; // 19
+constexpr static const char* AMEDIAFORMAT_KEY_ROTATION = "rotation-degrees"; // 23
+constexpr static const char* AMEDIAFORMAT_KEY_SAMPLE_RATE = "sample-rate";
 extern const char* AMEDIAFORMAT_KEY_SEI;
 constexpr static const char* AMEDIAFORMAT_KEY_SLICE_HEIGHT = "slice-height";
 constexpr static const char* AMEDIAFORMAT_KEY_STRIDE = "stride";
 extern const char* AMEDIAFORMAT_KEY_TEMPORAL_LAYER_ID;                                                                                                                            
-extern const char* AMEDIAFORMAT_KEY_TEMPORAL_LAYERING;
+constexpr static const char* AMEDIAFORMAT_KEY_TEMPORAL_LAYERING = "ts-schema"; // 21
 extern const char* AMEDIAFORMAT_KEY_TILE_HEIGHT;
 extern const char* AMEDIAFORMAT_KEY_TILE_WIDTH;
 extern const char* AMEDIAFORMAT_KEY_TIME_US;
-extern const char* AMEDIAFORMAT_KEY_TRACK_ID;
+constexpr static const char* AMEDIAFORMAT_KEY_TRACK_ID = "track-id"; // 24
 extern const char* AMEDIAFORMAT_KEY_TRACK_INDEX;
 constexpr static const char* AMEDIAFORMAT_KEY_WIDTH = "width";
 NDKMEDIA_NS_END
