@@ -67,6 +67,8 @@ AMediaFormat *AMediaFormat_new() {
 }
 
 media_status_t AMediaFormat_delete(AMediaFormat* obj) {
+    if (!obj) // required if used as smart ptr deleter
+        return AMEDIA_OK;
     void* so = mediandk_so();
     if (!so) {
         delete obj;

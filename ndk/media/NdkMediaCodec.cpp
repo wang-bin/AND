@@ -100,6 +100,8 @@ AMediaCodec* AMediaCodec_createEncoderByType(const char *mime_type)
 
 media_status_t AMediaCodec_delete(AMediaCodec* obj)
 {
+    if (!obj) // required if used as smart ptr deleter
+        return AMEDIA_OK;
     void* so = mediandk_so();
     if (so) {
         static auto fp = (decltype(&AMediaCodec_delete))dlsym(so, __func__);

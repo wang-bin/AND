@@ -61,6 +61,8 @@ AMediaCrypto* AMediaCrypto_new(const AMediaUUID uuid, const void *initData, size
 
 void AMediaCrypto_delete(AMediaCrypto* obj)
 {
+    if (!obj) // required if used as smart ptr deleter
+        return;
     void* so = mediandk_so();
     if (so) {
         static auto fp = (decltype(&AMediaCrypto_delete))dlsym(so, __func__);
