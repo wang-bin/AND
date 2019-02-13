@@ -1,18 +1,17 @@
 /*
  * AND: Android Native Dev in Modern C++ based on JMI
- * Copyright (C) 2018 Wang Bin - wbsecg1@gmail.com
+ * Copyright (C) 2018-2019 Wang Bin - wbsecg1@gmail.com
  * https://github.com/wang-bin/AND
  * https://github.com/wang-bin/JMI
  * MIT License
  */
-
+// TODO: jmi error/exception => media_status_t. libhybrid?
 #include "NdkMediaCodec.hpp"
 #include "android.media.MediaCodec.hpp"
 #include <cassert>
 #include <dlfcn.h>
 #include <iostream>
 #include <vector>
-// TODO: jmi error/exception => media_status_t
 NDKMEDIA_NS_BEGIN
 using namespace jmi;
 using namespace std;
@@ -62,6 +61,7 @@ AMediaCodec* toNdk(const AMediaCodec* obj)
 AMediaCodec* AMediaCodec_createCodecByName(const char *name)
 {
     void* so = mediandk_so();
+    std::clog << __func__ << " via ndk: " << !!so << std::endl;
     if (so) {
         static auto fp = (decltype(&AMediaCodec_createCodecByName))dlsym(so, __func__);
         return fromNdk(fp(name));
@@ -75,11 +75,12 @@ AMediaCodec* AMediaCodec_createCodecByName(const char *name)
 AMediaCodec* AMediaCodec_createDecoderByType(const char *mime_type)
 {
     void* so = mediandk_so();
+    std::clog << __func__ << " via ndk: " << !!so << std::endl;
     if (so) {
         static auto fp = (decltype(&AMediaCodec_createDecoderByType))dlsym(so, __func__);
         return fromNdk(fp(mime_type));
     }
-    auto obj = android::media::MediaCodec::createDecoderByType(mime_type);
+    auto obj = android::media::MediaCodec::createDecoderByType(mime_type); // Blocking?
     if (!obj)
         return nullptr;
     return fromJmi(std::move(obj));
@@ -88,6 +89,7 @@ AMediaCodec* AMediaCodec_createDecoderByType(const char *mime_type)
 AMediaCodec* AMediaCodec_createEncoderByType(const char *mime_type)
 {
     void* so = mediandk_so();
+    std::clog << __func__ << " via ndk: " << !!so << std::endl;
     if (so) {
         static auto fp = (decltype(&AMediaCodec_createEncoderByType))dlsym(so, __func__);
         return fromNdk(fp(mime_type));
@@ -120,9 +122,10 @@ media_status_t AMediaCodec_delete(AMediaCodec* obj)
     return AMEDIA_OK;
 }
 
-// FIXME: null if dyload
-extern "C" jobject ANativeWindow_toSurface(JNIEnv* env, ANativeWindow* window) __attribute__((weak));
+// null if dyload
+extern "C" jobject ANativeWindow_toSurface(JNIEnv* env, ANativeWindow* window) __attribute__((weak)); // FIXME: arm64 thin lto does not support weak?
 
+// TODO: surface=>{surface, anw}
 media_status_t AMediaCodec_configure(AMediaCodec* obj, const AMediaFormat* format, ANativeWindow* surface, AMediaCrypto *crypto, uint32_t flags)
 {
     void* so = mediandk_so();
@@ -134,11 +137,16 @@ media_status_t AMediaCodec_configure(AMediaCodec* obj, const AMediaFormat* forma
 // core/jni/android_view_Surface.cpp: Surface=>NewObject, internal ptr incStrong
     android::view::Surface s;
     JNIEnv* env = getEnv();
-    if (ANativeWindow_toSurface)
-        s.reset(ANativeWindow_toSurface(env, surface), env);
-    else
-        s.reset(env->NewLocalRef(jobject(surface)), env);  // FIXME: expected reference of kind local reference but found global reference
-    obj->jni_.configure(toJmi(format), s, toJmi(crypto), flags); // FIXME: expected reference of kind local reference but found global reference
+    static void* libandroid_so = dlopen("libandroid.so", RTLD_NOLOAD|RTLD_LOCAL);
+    using ANativeWindow_toSurface_t = jobject(*)(JNIEnv* env, ANativeWindow* window);
+    static auto ANativeWindow_toSurface = (ANativeWindow_toSurface_t)dlsym(libandroid_so ? libandroid_so : RTLD_DEFAULT, "ANativeWindow_toSurface");
+    if (surface) {
+        if (ANativeWindow_toSurface)
+            s.reset(ANativeWindow_toSurface(env, surface), env);
+        else
+            s.reset(env->NewLocalRef(jobject(surface)), env);  // FIXME: expected reference of kind local reference but found global reference
+    }
+    obj->jni_.configure(toJmi(format), s, toJmi(crypto), flags);
     if (obj->jni_.error().empty())
         return AMEDIA_OK;
     std::clog << __func__ << " ERROR: " << obj->jni_.error() << std::endl;
