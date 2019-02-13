@@ -1,6 +1,6 @@
 /*
  * AND: Android Native Dev in Modern C++ based on JMI
- * Copyright (C) 2018 Wang Bin - wbsecg1@gmail.com
+ * Copyright (C) 2018-2019 Wang Bin - wbsecg1@gmail.com
  * https://github.com/wang-bin/AND
  * https://github.com/wang-bin/JMI
  * MIT License
@@ -28,6 +28,14 @@ void AMediaFormat_setInt64(AMediaFormat*, const char* name, int64_t value);
 void AMediaFormat_setFloat(AMediaFormat*, const char* name, float value);
 void AMediaFormat_setString(AMediaFormat*, const char* name, const char* value);
 void AMediaFormat_setBuffer(AMediaFormat*, const char* name, void* data, size_t size);
+//#if __ANDROID_API__ >= 28
+// api 28 apis are ndk only, no java apis
+bool AMediaFormat_getDouble(AMediaFormat*, const char *name, double *out);// __INTRODUCED_IN(28);
+bool AMediaFormat_getRect(AMediaFormat*, const char *name, int32_t *left, int32_t *top, int32_t *right, int32_t *bottom);// __INTRODUCED_IN(28);
+void AMediaFormat_setDouble(AMediaFormat*, const char* name, double value);// __INTRODUCED_IN(28);
+void AMediaFormat_setSize(AMediaFormat*, const char* name, size_t value);// __INTRODUCED_IN(28);
+void AMediaFormat_setRect(AMediaFormat*, const char* name, int32_t left, int32_t top, int32_t right, int32_t bottom);// __INTRODUCED_IN(28);
+//#endif /* __ANDROID_API__ >= 28 */
 
 // constexpr
 constexpr static const char* AMEDIAFORMAT_KEY_AAC_DRC_ATTENUATION_FACTOR = "aac-drc-cut-level"; // 21

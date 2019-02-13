@@ -1,6 +1,6 @@
 /*
  * AND: Android Native Dev in Modern C++ based on JMI
- * Copyright (C) 2018 Wang Bin - wbsecg1@gmail.com
+ * Copyright (C) 2018-2019 Wang Bin - wbsecg1@gmail.com
  * https://github.com/wang-bin/AND
  * https://github.com/wang-bin/JMI
  * MIT License
@@ -240,8 +240,61 @@ void AMediaFormat_setBuffer(AMediaFormat* obj, const char* name, void* data, siz
     if (!obj->jni_.error().empty())
         std::clog << __func__ << " ERROR: " << obj->jni_.error() << std::endl;
 }
+
+bool AMediaFormat_getDouble(AMediaFormat* obj, const char *name, double *out)
+{
+    void* so = mediandk_so();
+    if (!so)
+        return false;
+    static auto fp = (decltype(&AMediaFormat_getDouble))dlsym(so, __func__);
+    if (!fp)
+        return false;
+    return fp(obj->ndk_, name, out);
+}
+
+bool AMediaFormat_getRect(AMediaFormat* obj, const char *name, int32_t *left, int32_t *top, int32_t *right, int32_t *bottom)
+{
+    void* so = mediandk_so();
+    if (!so)
+        return false;
+    static auto fp = (decltype(&AMediaFormat_getRect))dlsym(so, __func__);
+    if (!fp)
+        return false;
+    return fp(obj->ndk_, name, left, top, right, bottom);
+}
+
+void AMediaFormat_setDouble(AMediaFormat* obj, const char* name, double value)
+{
+    void* so = mediandk_so();
+    if (!so)
+        return;
+    static auto fp = (decltype(&AMediaFormat_setDouble))dlsym(so, __func__);
+    if (!fp)
+        fp(obj->ndk_, name, value);
+}
+
+void AMediaFormat_setSize(AMediaFormat* obj, const char* name, size_t value)
+{
+    void* so = mediandk_so();
+    if (!so)
+        return;
+    static auto fp = (decltype(&AMediaFormat_setSize))dlsym(so, __func__);
+    if (fp)
+        return fp(obj->ndk_, name, value);
+}
+
+void AMediaFormat_setRect(AMediaFormat* obj, const char* name, int32_t left, int32_t top, int32_t right, int32_t bottom)
+{
+    void* so = mediandk_so();
+    if (!so)
+        return;
+    static auto fp = (decltype(&AMediaFormat_setRect))dlsym(so, __func__);
+    if (fp)
+        return fp(obj->ndk_, name, left, top, right, bottom);
+}
 NDKMEDIA_NS_END
 
+// NOTE: global, all codecs MUST be the same value, otherwise it's UB
 void mediandk_set_emulated(bool value) {
     NDKMEDIA_NS::sEmulated = value;
 }
