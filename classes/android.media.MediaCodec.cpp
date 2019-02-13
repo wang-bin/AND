@@ -1,6 +1,6 @@
 /*
  * AND: Android Native Dev in Modern C++ based on JMI
- * Copyright (C) 2018 Wang Bin - wbsecg1@gmail.com
+ * Copyright (C) 2018-2019 Wang Bin - wbsecg1@gmail.com
  * https://github.com/wang-bin/AND
  * https://github.com/wang-bin/JMI
  * MIT License
@@ -57,6 +57,7 @@ JMI_DEFINE_STATIC(MediaCodec, MediaCodec::createDecoderByType, JMI_ARG1(const ch
 JMI_DEFINE_STATIC(MediaCodec, MediaCodec::createEncoderByType, JMI_ARG1(const char*))
 JMI_DEFINE_STATIC(MediaCodec, MediaCodec::createByCodecName, JMI_ARG1(const char*))
 JMI_DEFINE_CONST(MediaFormat, MediaCodec::getOutputFormat, JMI_ARG0())
+JMI_DEFINE_CONST(std::string, MediaCodec::getName, JMI_ARG0())
 JMI_DEFINE(void, MediaCodec::release, JMI_ARG0())
 JMI_DEFINE(void, MediaCodec::configure, JMI_ARG4(const MediaFormat&, const view::Surface&, const MediaCrypto&, jint))
 JMI_DEFINE(void, MediaCodec::start, JMI_ARG0())

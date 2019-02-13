@@ -28,6 +28,7 @@ struct AMediaCodec {
     AMediaCodec* ndk_; // what ptr type does not matter, but AMediaCodec* can simplify implementation
     android::media::MediaCodec jni_; //
     AMediaFormat* ofmt_;
+    std::string name_;
     std::vector<java::nio::ByteBuffer> inbufs_; // jni only
     std::vector<java::nio::ByteBuffer> outbufs_; // jni only
 };
@@ -356,4 +357,29 @@ media_status_t AMediaCodec_setInputSurface(AMediaCodec*, ANativeWindow *surface)
 media_status_t AMediaCodec_setParameters(AMediaCodec*, const AMediaFormat* params);
 media_status_t AMediaCodec_signalEndOfInputStream(AMediaCodec*);
 
+media_status_t AMediaCodec_getName(AMediaCodec* obj, char** out_name)
+{
+    void* so = mediandk_so();
+    if (so) {
+        static auto fp = (decltype(&AMediaCodec_getName))dlsym(so, __func__);
+        return fp(obj->ndk_, out_name);
+    }
+    obj->name_ = std::move(obj->jni_.getName());
+    if (obj->jni_.error().empty()) {
+        *out_name = &obj->name_[0];
+        return AMEDIA_OK;
+    }
+    std::clog << __func__ << " ERROR: " << obj->jni_.error() << std::endl;
+    return AMEDIA_ERROR_BASE;
+}
+
+void AMediaCodec_releaseName(AMediaCodec* obj, char* name)
+{
+    void* so = mediandk_so();
+    if (so) {
+        static auto fp = (decltype(&AMediaCodec_releaseName))dlsym(so, __func__);
+        return fp(obj->ndk_, name);
+    }
+    obj->name_.clear();
+}
 NDKMEDIA_NS_END

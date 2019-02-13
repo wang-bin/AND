@@ -1,7 +1,7 @@
 
 /*
  * AND: Android Native Dev in Modern C++ based on JMI
- * Copyright (C) 2018 Wang Bin - wbsecg1@gmail.com
+ * Copyright (C) 2018-2019 Wang Bin - wbsecg1@gmail.com
  * https://github.com/wang-bin/AND
  * https://github.com/wang-bin/JMI
  * MIT License
@@ -52,8 +52,11 @@ media_status_t AMediaCodec_flush(AMediaCodec*);
 uint8_t* AMediaCodec_getInputBuffer(AMediaCodec*, size_t idx, size_t *out_size);
 uint8_t* AMediaCodec_getOutputBuffer(AMediaCodec*, size_t idx, size_t *out_size);
 ssize_t AMediaCodec_dequeueInputBuffer(AMediaCodec*, int64_t timeoutUs);
+
+// c11/c++11: _off_t_compat == long
 media_status_t AMediaCodec_queueInputBuffer(AMediaCodec*, size_t idx, long offset, size_t size, uint64_t time, uint32_t flags);
 media_status_t AMediaCodec_queueSecureInputBuffer(AMediaCodec*, size_t idx, long offset, AMediaCodecCryptoInfo*, uint64_t time, uint32_t flags);
+
 ssize_t AMediaCodec_dequeueOutputBuffer(AMediaCodec*, AMediaCodecBufferInfo *info, int64_t timeoutUs);
 AMediaFormat* AMediaCodec_getOutputFormat(AMediaCodec*); // owned by AMediaCodec
 media_status_t AMediaCodec_releaseOutputBuffer(AMediaCodec*, size_t idx, bool render);
@@ -66,6 +69,10 @@ media_status_t AMediaCodec_setInputSurface(AMediaCodec*, ANativeWindow *surface)
 media_status_t AMediaCodec_setParameters(AMediaCodec*, const AMediaFormat* params);
 media_status_t AMediaCodec_signalEndOfInputStream(AMediaCodec*);
 
+// TODO: AMediaCodecCryptoInfo_new... (21)
+
 // 28
+media_status_t AMediaCodec_getName(AMediaCodec*, char** out_name);// __INTRODUCED_IN(28);
+void AMediaCodec_releaseName(AMediaCodec*, char* name);// __INTRODUCED_IN(28);
 //media_status_t AMediaCodec_setAsyncNotifyCallback(AMediaCodec*, AMediaCodecOnAsyncNotifyCallback callback, void *userdata);
 NDKMEDIA_NS_END

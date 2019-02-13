@@ -1,6 +1,6 @@
 /*
  * AND: Android Native Dev in Modern C++ based on JMI
- * Copyright (C) 2018 Wang Bin - wbsecg1@gmail.com
+ * Copyright (C) 2018-2019 Wang Bin - wbsecg1@gmail.com
  * https://github.com/wang-bin/AND
  * https://github.com/wang-bin/JMI
  * MIT License
@@ -68,6 +68,7 @@ public:
     jint dequeueOutputBuffer(std::reference_wrapper<BufferInfo> info, jlong timeoutUs);
     void releaseOutputBuffer(jint index, jboolean render);
     MediaFormat getOutputFormat() const; // MediaFormat must be of type JObject subclass
+    std::string getName() const; // api 18
     std::vector<java::nio::ByteBuffer> getInputBuffers(); // Deprecated as of API 21
     std::vector<java::nio::ByteBuffer> getOutputBuffers(); // Deprecated as of API 21
     /*
