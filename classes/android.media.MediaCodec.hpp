@@ -67,6 +67,7 @@ public:
     jint dequeueOutputBuffer(BufferInfo& info, jlong timeoutUs);
     jint dequeueOutputBuffer(std::reference_wrapper<BufferInfo> info, jlong timeoutUs);
     void releaseOutputBuffer(jint index, jboolean render);
+    void releaseOutputBuffer(jint index, jlong renderTimestampNs); // api 21
     MediaFormat getOutputFormat() const; // MediaFormat must be of type JObject subclass
     std::string getName() const; // api 18
     std::vector<java::nio::ByteBuffer> getInputBuffers(); // Deprecated as of API 21

@@ -8,7 +8,6 @@
 // TODO: jmi error/exception => media_status_t. libhybrid?
 #include "NdkMediaCodec.hpp"
 #include "android.media.MediaCodec.hpp"
-#include <cassert>
 #include <dlfcn.h>
 #include <iostream>
 #include <vector>
@@ -62,7 +61,7 @@ AMediaCodec* toNdk(const AMediaCodec* obj)
 AMediaCodec* AMediaCodec_createCodecByName(const char *name)
 {
     void* so = mediandk_so();
-    std::clog << __func__ << " via ndk: " << !!so << std::endl;
+    std::clog << __PRETTY_FUNCTION__ << " via ndk: " << !!so << std::endl;
     if (so) {
         static auto fp = (decltype(&AMediaCodec_createCodecByName))dlsym(so, __func__);
         return fromNdk(fp(name));
@@ -76,7 +75,7 @@ AMediaCodec* AMediaCodec_createCodecByName(const char *name)
 AMediaCodec* AMediaCodec_createDecoderByType(const char *mime_type)
 {
     void* so = mediandk_so();
-    std::clog << __func__ << " via ndk: " << !!so << std::endl;
+    std::clog << __PRETTY_FUNCTION__ << " via ndk: " << !!so << std::endl;
     if (so) {
         static auto fp = (decltype(&AMediaCodec_createDecoderByType))dlsym(so, __func__);
         return fromNdk(fp(mime_type));
@@ -90,7 +89,7 @@ AMediaCodec* AMediaCodec_createDecoderByType(const char *mime_type)
 AMediaCodec* AMediaCodec_createEncoderByType(const char *mime_type)
 {
     void* so = mediandk_so();
-    std::clog << __func__ << " via ndk: " << !!so << std::endl;
+    std::clog << __PRETTY_FUNCTION__ << " via ndk: " << !!so << std::endl;
     if (so) {
         static auto fp = (decltype(&AMediaCodec_createEncoderByType))dlsym(so, __func__);
         return fromNdk(fp(mime_type));
@@ -150,7 +149,7 @@ media_status_t AMediaCodec_configure(AMediaCodec* obj, const AMediaFormat* forma
     obj->jni_.configure(toJmi(format), s, toJmi(crypto), flags);
     if (obj->jni_.error().empty())
         return AMEDIA_OK;
-    std::clog << __func__ << " ERROR: " << obj->jni_.error() << std::endl;
+    std::clog << __PRETTY_FUNCTION__ << " ERROR: " << obj->jni_.error() << std::endl;
     return AMEDIA_ERROR_BASE;
 }
 
@@ -164,7 +163,7 @@ media_status_t AMediaCodec_start(AMediaCodec* obj)
     obj->jni_.start();
     if (obj->jni_.error().empty())
         return AMEDIA_OK;
-    std::clog << __func__ << " ERROR: " << obj->jni_.error() << std::endl;
+    std::clog << __PRETTY_FUNCTION__ << " ERROR: " << obj->jni_.error() << std::endl;
     return AMEDIA_ERROR_BASE;
 }
 
@@ -179,7 +178,7 @@ media_status_t AMediaCodec_stop(AMediaCodec* obj)
     return AMEDIA_OK;
     if (obj->jni_.error().empty())
         return AMEDIA_OK;
-    std::clog << __func__ << " ERROR: " << obj->jni_.error() << std::endl;
+    std::clog << __PRETTY_FUNCTION__ << " ERROR: " << obj->jni_.error() << std::endl;
     return AMEDIA_ERROR_BASE;
 }
 
@@ -193,7 +192,7 @@ media_status_t AMediaCodec_flush(AMediaCodec* obj)
     obj->jni_.flush();
     if (obj->jni_.error().empty())
         return AMEDIA_OK;
-    std::clog << __func__ << " ERROR: " << obj->jni_.error() << std::endl;
+    std::clog << __PRETTY_FUNCTION__ << " ERROR: " << obj->jni_.error() << std::endl;
     return AMEDIA_ERROR_BASE;
 }
 
@@ -258,7 +257,7 @@ ssize_t AMediaCodec_dequeueInputBuffer(AMediaCodec* obj, int64_t timeoutUs)
     }
     auto ret = obj->jni_.dequeueInputBuffer(timeoutUs);
     if (!obj->jni_.error().empty())
-        std::clog << __func__ << " ERROR: " << obj->jni_.error() << std::endl;
+        std::clog << __PRETTY_FUNCTION__ << " ERROR: " << obj->jni_.error() << std::endl;
     return ret;
 }
 
@@ -272,7 +271,7 @@ media_status_t AMediaCodec_queueInputBuffer(AMediaCodec* obj, size_t idx, long o
     obj->jni_.queueInputBuffer(idx, offset, size, time, flags);
     if (obj->jni_.error().empty())
         return AMEDIA_OK;
-    std::clog << __func__ << " ERROR: " << obj->jni_.error() << std::endl;
+    std::clog << __PRETTY_FUNCTION__ << " ERROR: " << obj->jni_.error() << std::endl;
     return AMEDIA_ERROR_BASE;
 }
 
@@ -292,7 +291,7 @@ ssize_t AMediaCodec_dequeueOutputBuffer(AMediaCodec* obj, AMediaCodecBufferInfo 
     }
     auto ret = obj->jni_.dequeueOutputBuffer(std::ref(bi), timeoutUs);
     if (!obj->jni_.error().empty())
-        std::clog << __func__ << " ERROR: " << obj->jni_.error() << std::endl;
+        std::clog << __PRETTY_FUNCTION__ << " ERROR: " << obj->jni_.error() << std::endl;
     if (info && bi) {
         info->offset = bi.offset();
         info->size = bi.size();
@@ -312,7 +311,7 @@ AMediaFormat* AMediaCodec_getOutputFormat(AMediaCodec* obj)
     obj->ofmt_ = fromJmi(std::move(obj->jni_.getOutputFormat()));
     if (obj->jni_.error().empty())
         return obj->ofmt_;
-    std::clog << __func__ << " ERROR: " << obj->jni_.error() << std::endl;
+    std::clog << __PRETTY_FUNCTION__ << " ERROR: " << obj->jni_.error() << std::endl;
     return nullptr;
 }
 
@@ -326,25 +325,32 @@ media_status_t AMediaCodec_releaseOutputBuffer(AMediaCodec* obj, size_t idx, boo
     obj->jni_.releaseOutputBuffer(idx, (jboolean)render);
     if (obj->jni_.error().empty())
         return AMEDIA_OK;
-    std::clog << __func__ << " ERROR: " << obj->jni_.error() << std::endl;
+    std::clog << __PRETTY_FUNCTION__ << " ERROR: " << obj->jni_.error() << std::endl;
     return AMEDIA_ERROR_BASE;
 }
 
 media_status_t AMediaCodec_setOutputSurface(AMediaCodec* obj, ANativeWindow* surface)
-{ // TODO: java 23
+{
     void* so = mediandk_so();
-    assert(so);
-    static auto fp = (decltype(&AMediaCodec_setOutputSurface))dlsym(so, __func__);
-    return fp(obj->ndk_, surface);
+    if (so) {
+        static auto fp = (decltype(&AMediaCodec_setOutputSurface))dlsym(so, __func__);
+        return fp(obj->ndk_, surface);
+    }
+    return AMEDIA_ERROR_UNSUPPORTED;
 }
 
 media_status_t AMediaCodec_releaseOutputBufferAtTime(AMediaCodec *obj, size_t idx, int64_t timestampNs)
 {
-// TODO: java api 21: releaseOutputBuffer(..., timestampNs)
     void* so = mediandk_so();
-    assert(so);
-    static auto fp = (decltype(&AMediaCodec_releaseOutputBufferAtTime))dlsym(so, __func__);
-    return fp(obj->ndk_, idx, timestampNs);
+    if (so) {
+        static auto fp = (decltype(&AMediaCodec_releaseOutputBufferAtTime))dlsym(so, __func__);
+        return fp(obj->ndk_, idx, timestampNs);
+    }
+    obj->jni_.releaseOutputBuffer(idx, jlong(timestampNs)); // api 21
+    if (obj->jni_.error().empty())
+        return AMEDIA_OK;
+    std::clog << __PRETTY_FUNCTION__ << " ERROR: " << obj->jni_.error() << std::endl;
+    return AMEDIA_ERROR_BASE;
 }
 
 media_status_t AMediaCodec_createInputSurface(AMediaCodec *obj, ANativeWindow **surface)
@@ -371,7 +377,7 @@ media_status_t AMediaCodec_getName(AMediaCodec* obj, char** out_name)
         *out_name = &obj->name_[0];
         return AMEDIA_OK;
     }
-    std::clog << __func__ << " ERROR: " << obj->jni_.error() << std::endl;
+    std::clog << __PRETTY_FUNCTION__ << " ERROR: " << obj->jni_.error() << std::endl;
     return AMEDIA_ERROR_BASE;
 }
 
