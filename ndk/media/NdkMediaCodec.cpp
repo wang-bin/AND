@@ -323,7 +323,7 @@ media_status_t AMediaCodec_releaseOutputBuffer(AMediaCodec* obj, size_t idx, boo
         static auto fp = (decltype(&AMediaCodec_releaseOutputBuffer))dlsym(so, __func__);
         return fp(obj->ndk_, idx, render);
     }
-    obj->jni_.releaseOutputBuffer(idx, render);
+    obj->jni_.releaseOutputBuffer(idx, (jboolean)render);
     if (obj->jni_.error().empty())
         return AMEDIA_OK;
     std::clog << __func__ << " ERROR: " << obj->jni_.error() << std::endl;
@@ -331,7 +331,7 @@ media_status_t AMediaCodec_releaseOutputBuffer(AMediaCodec* obj, size_t idx, boo
 }
 
 media_status_t AMediaCodec_setOutputSurface(AMediaCodec* obj, ANativeWindow* surface)
-{ // api 23
+{ // TODO: java 23
     void* so = mediandk_so();
     assert(so);
     static auto fp = (decltype(&AMediaCodec_setOutputSurface))dlsym(so, __func__);
@@ -339,8 +339,8 @@ media_status_t AMediaCodec_setOutputSurface(AMediaCodec* obj, ANativeWindow* sur
 }
 
 media_status_t AMediaCodec_releaseOutputBufferAtTime(AMediaCodec *obj, size_t idx, int64_t timestampNs)
-{ // api 21
-// jni: releaseOutputBuffer(..., timestampNs)
+{
+// TODO: java api 21: releaseOutputBuffer(..., timestampNs)
     void* so = mediandk_so();
     assert(so);
     static auto fp = (decltype(&AMediaCodec_releaseOutputBufferAtTime))dlsym(so, __func__);
@@ -348,7 +348,7 @@ media_status_t AMediaCodec_releaseOutputBufferAtTime(AMediaCodec *obj, size_t id
 }
 
 media_status_t AMediaCodec_createInputSurface(AMediaCodec *obj, ANativeWindow **surface)
-{ // api 18
+{ // TODO: java api 18, ndk 26
     return AMEDIA_ERROR_UNSUPPORTED;
 }
 
@@ -362,6 +362,8 @@ media_status_t AMediaCodec_getName(AMediaCodec* obj, char** out_name)
     void* so = mediandk_so();
     if (so) {
         static auto fp = (decltype(&AMediaCodec_getName))dlsym(so, __func__);
+        if (!fp)
+            return AMEDIA_ERROR_UNSUPPORTED;
         return fp(obj->ndk_, out_name);
     }
     obj->name_ = std::move(obj->jni_.getName());
@@ -378,6 +380,8 @@ void AMediaCodec_releaseName(AMediaCodec* obj, char* name)
     void* so = mediandk_so();
     if (so) {
         static auto fp = (decltype(&AMediaCodec_releaseName))dlsym(so, __func__);
+        if (!fp)
+            return;
         return fp(obj->ndk_, name);
     }
     obj->name_.clear();

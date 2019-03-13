@@ -6,6 +6,7 @@
  * https://github.com/wang-bin/JMI
  * MIT License
  */
+// if introduced in ndk api > 21 or java api > 16, MUST check return value, which is AMEDIA_ERROR_UNSUPPORTED if not supported by ndk
 
 #pragma once
 #include "NdkMediaCrypto.hpp"
@@ -57,22 +58,23 @@ ssize_t AMediaCodec_dequeueInputBuffer(AMediaCodec*, int64_t timeoutUs);
 media_status_t AMediaCodec_queueInputBuffer(AMediaCodec*, size_t idx, long offset, size_t size, uint64_t time, uint32_t flags);
 media_status_t AMediaCodec_queueSecureInputBuffer(AMediaCodec*, size_t idx, long offset, AMediaCodecCryptoInfo*, uint64_t time, uint32_t flags);
 
-ssize_t AMediaCodec_dequeueOutputBuffer(AMediaCodec*, AMediaCodecBufferInfo *info, int64_t timeoutUs);
-AMediaFormat* AMediaCodec_getOutputFormat(AMediaCodec*); // owned by AMediaCodec
-media_status_t AMediaCodec_releaseOutputBuffer(AMediaCodec*, size_t idx, bool render);
-media_status_t AMediaCodec_setOutputSurface(AMediaCodec*, ANativeWindow* surface);
-media_status_t AMediaCodec_releaseOutputBufferAtTime(AMediaCodec*, size_t idx, int64_t timestampNs);
+ssize_t AMediaCodec_dequeueOutputBuffer(AMediaCodec*, AMediaCodecBufferInfo *info, int64_t timeoutUs); // __INTRODUCED_IN(21), java 16
+AMediaFormat* AMediaCodec_getOutputFormat(AMediaCodec*); // __INTRODUCED_IN(21), java 16 // owned by AMediaCodec
+media_status_t AMediaCodec_releaseOutputBuffer(AMediaCodec*, size_t idx, bool render); // __INTRODUCED_IN(21), java 16
+media_status_t AMediaCodec_setOutputSurface(AMediaCodec*, ANativeWindow* surface); // __INTRODUCED_IN(21), java 23
+media_status_t AMediaCodec_releaseOutputBufferAtTime(AMediaCodec*, size_t idx, int64_t timestampNs); // __INTRODUCED_IN(21), java 21
+
 // encoders
-media_status_t AMediaCodec_createInputSurface(AMediaCodec*, ANativeWindow **surface);
-media_status_t AMediaCodec_createPersistentInputSurface(ANativeWindow **surface);
-media_status_t AMediaCodec_setInputSurface(AMediaCodec*, ANativeWindow *surface);
-media_status_t AMediaCodec_setParameters(AMediaCodec*, const AMediaFormat* params);
-media_status_t AMediaCodec_signalEndOfInputStream(AMediaCodec*);
+media_status_t AMediaCodec_createInputSurface(AMediaCodec*, ANativeWindow **surface); // __INTRODUCED_IN(26), java 18
+media_status_t AMediaCodec_createPersistentInputSurface(ANativeWindow **surface); // __INTRODUCED_IN(26), java 23
+media_status_t AMediaCodec_setInputSurface(AMediaCodec*, ANativeWindow *surface); // __INTRODUCED_IN(26), java 23
+media_status_t AMediaCodec_setParameters(AMediaCodec*, const AMediaFormat* params); // __INTRODUCED_IN(26), java 19
+media_status_t AMediaCodec_signalEndOfInputStream(AMediaCodec*); // __INTRODUCED_IN(26), java 18
 
 // TODO: AMediaCodecCryptoInfo_new... (21)
 
 // 28
-media_status_t AMediaCodec_getName(AMediaCodec*, char** out_name);// __INTRODUCED_IN(28);
-void AMediaCodec_releaseName(AMediaCodec*, char* name);// __INTRODUCED_IN(28);
+media_status_t AMediaCodec_getName(AMediaCodec*, char** out_name);// __INTRODUCED_IN(28), java 18
+void AMediaCodec_releaseName(AMediaCodec*, char* name);// __INTRODUCED_IN(28). no java
 //media_status_t AMediaCodec_setAsyncNotifyCallback(AMediaCodec*, AMediaCodecOnAsyncNotifyCallback callback, void *userdata);
 NDKMEDIA_NS_END
