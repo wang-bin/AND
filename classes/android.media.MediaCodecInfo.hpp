@@ -13,35 +13,70 @@
 namespace jmi {
 namespace android {
 namespace media {
-class MediaCodecInfo : public jmi::JObject<MediaCodecInfo> { // inherits JObject so that it can be a return type like primitive types
+class MediaCodecInfo final: public jmi::JObject<MediaCodecInfo> { // inherits JObject so that it can be a return type like primitive types
 public:
     using Base = jmi::JObject<MediaCodecInfo>;
     using Base::Base; // inherits ctors
     static std::string name() { return "android/media/MediaCodecInfo";} // required if derive from JObject<>
 
-    struct CodecProfileLevel : jmi::JObject<CodecProfileLevel> {
+    struct AudioCapabilities final: public jmi::JObject<AudioCapabilities> { // api21
+        using Base = jmi::JObject<AudioCapabilities>;
+        using Base::Base; // inherits ctors
+        using jmi::JObject<AudioCapabilities>::create;
+        static std::string name() { return "android/media/MediaCodecInfo$AudioCapabilities";} // required if derive from JObject<>
+        jboolean isSampleRateSupported(jint sampleRate) const;
+        jint getMaxInputChannelCount() const;
+        std::vector<jint> getSupportedSampleRates() const;
+    };
+
+    struct VideoCapabilities final: public jmi::JObject<VideoCapabilities> { // api21
+        using Base = jmi::JObject<VideoCapabilities>;
+        using Base::Base; // inherits ctors
+        using jmi::JObject<VideoCapabilities>::create;
+        static std::string name() { return "android/media/MediaCodecInfo$VideoCapabilities";} // required if derive from JObject<>
+        jboolean areSizeAndRateSupported(jint width, jint height, jdouble frameRate) const;
+        jboolean isSizeSupported(jint width, jint height) const;
+        jint getHeightAlignment() const;
+        jint getWidthAlignment() const;
+    };
+
+    struct EncoderCapabilities final: public jmi::JObject<EncoderCapabilities> { // api21
+        enum {
+            BITRATE_MODE_CQ = 0,
+            BITRATE_MODE_VBR = 1,
+            BITRATE_MODE_CBR = 2,
+        };
+        using Base = jmi::JObject<EncoderCapabilities>;
+        using Base::Base; // inherits ctors
+        using jmi::JObject<EncoderCapabilities>::create;
+        static std::string name() { return "android/media/MediaCodecInfo$EncoderCapabilities";} // required if derive from JObject<>
+        jboolean isBitrateModeSupported(jint mode) const;
+    };
+
+    struct CodecProfileLevel final: jmi::JObject<CodecProfileLevel> { //api16
         using Base = jmi::JObject<CodecProfileLevel>;
         using Base::Base; // inherits ctors
         using jmi::JObject<CodecProfileLevel>::create;
         static std::string name() { return "android/media/MediaCodecInfo$CodecProfileLevel";} // required if derive from JObject<>
         enum { // static field
-            AACObjectELD = 39,
+            AACObjectMain = 1,
+            AACObjectLC = 2,
+            AACObjectSSR = 3,
+            AACObjectLTP = 4,
+            AACObjectHE = 5,
+            AACObjectScalable = 6,
             AACObjectERLC = 17,
             AACObjectERScalable = 20, // api26
-            AACObjectHE = 5,
-            AACObjectHE_PS = 29,
-            AACObjectLC = 2,
             AACObjectLD = 23,
-            AACObjectLTP = 4,
-            AACObjectMain = 1,
-            AACObjectSSR = 3,
-            AACObjectScalable = 6,
+            AACObjectHE_PS = 29,
+            AACObjectELD = 39,
             AACObjectXHE = 42, // api28
+
             AVCLevel1 = 1,
+            AVCLevel1b = 2,
             AVCLevel11 = 4,
             AVCLevel12 = 8,
             AVCLevel13 = 16,
-            AVCLevel1b = 2,
             AVCLevel2 = 32,
             AVCLevel21 = 64,
             AVCLevel22 = 128,
@@ -55,33 +90,35 @@ public:
             AVCLevel51 = 32768,
             AVCLevel52 = 65536, // api21
             AVCProfileBaseline = 1,
-            AVCProfileConstrainedBaseline = 65536, //api27
-            AVCProfileConstrainedHigh = 524288, //api27
+            AVCProfileMain = 2,
             AVCProfileExtended = 4,
             AVCProfileHigh = 8,
             AVCProfileHigh10 = 16,
             AVCProfileHigh422 = 32,
             AVCProfileHigh444 = 64,
-            AVCProfileMain = 2,
+            AVCProfileConstrainedBaseline = 65536, //api27
+            AVCProfileConstrainedHigh = 524288, //api27
+
+            DolbyVisionLevelHd24 = 1, //api24
+            DolbyVisionLevelHd30 = 2, //api24
             DolbyVisionLevelFhd24 = 4, //api24
             DolbyVisionLevelFhd30 = 8, //api24
             DolbyVisionLevelFhd60 = 16, //api24
-            DolbyVisionLevelHd24 = 1, //api24
-            DolbyVisionLevelHd30 = 2, //api24
             DolbyVisionLevelUhd24 = 32, //api24
             DolbyVisionLevelUhd30 = 64, //api24
             DolbyVisionLevelUhd48 = 128,
             DolbyVisionLevelUhd60 = 256,
-            DolbyVisionProfileDvavPen = 2,
             DolbyVisionProfileDvavPer = 1,
-            DolbyVisionProfileDvavSe = 512,
-            DolbyVisionProfileDvheDen = 8,
+            DolbyVisionProfileDvavPen = 2,
             DolbyVisionProfileDvheDer = 4,
-            DolbyVisionProfileDvheDtb = 128,
-            DolbyVisionProfileDvheDth = 64,
+            DolbyVisionProfileDvheDen = 8,
             DolbyVisionProfileDvheDtr = 16,
-            DolbyVisionProfileDvheSt = 256,
             DolbyVisionProfileDvheStn = 32,
+            DolbyVisionProfileDvheDth = 64,
+            DolbyVisionProfileDvheDtb = 128,
+            DolbyVisionProfileDvheSt = 256,
+            DolbyVisionProfileDvavSe = 512,
+
             H263Level10 = 1,
             H263Level20 = 2,
             H263Level30 = 4,
@@ -90,23 +127,21 @@ public:
             H263Level50 = 32,
             H263Level60 = 64,
             H263Level70 = 128,
-            H263ProfileBackwardCompatible = 4,
             H263ProfileBaseline = 1,
             H263ProfileH320Coding = 2,
-            H263ProfileHighCompression = 32,
-            H263ProfileHighLatency = 256,
+            H263ProfileBackwardCompatible = 4,
             H263ProfileISWV2 = 8,
             H263ProfileISWV3 = 16,
-            H263ProfileInterlace = 128,
+            H263ProfileHighCompression = 32,
             H263ProfileInternet = 64,
+            H263ProfileInterlace = 128,
+            H263ProfileHighLatency = 256,
             // api21
             HEVCHighTierLevel1 = 2,
             HEVCHighTierLevel2 = 8,
             HEVCHighTierLevel21 = 32,
             HEVCHighTierLevel3 = 128,
-            HEVCMainTierLevel31 = 256,
             HEVCHighTierLevel31 = 512,
-            HEVCMainTierLevel21 = 16,
             HEVCHighTierLevel4 = 2048,
             HEVCHighTierLevel41 = 8192,
             HEVCHighTierLevel5 = 32768,
@@ -117,7 +152,9 @@ public:
             HEVCHighTierLevel62 = 33554432,
             HEVCMainTierLevel1 = 1,
             HEVCMainTierLevel2 = 4,
+            HEVCMainTierLevel21 = 16,
             HEVCMainTierLevel3 = 64,
+            HEVCMainTierLevel31 = 256,
             HEVCMainTierLevel4 = 1024,
             HEVCMainTierLevel41 = 4096,
             HEVCMainTierLevel5 = 16384,
@@ -128,19 +165,21 @@ public:
             HEVCMainTierLevel62 = 16777216,
             HEVCProfileMain = 1,
             HEVCProfileMain10 = 2,
-            HEVCProfileMain10HDR10 = 4096, // api24
             HEVCProfileMainStill = 4, //api28
+            HEVCProfileMain10HDR10 = 4096, // api24
+
+            MPEG2LevelLL = 0, //api23
+            MPEG2LevelML = 1, //api23
             MPEG2LevelH14 = 2, // api23
             MPEG2LevelHL = 3, //api23
             MPEG2LevelHP = 4, //api24
-            MPEG2LevelLL = 0, //api23
-            MPEG2LevelML = 1, //api23
-            MPEG2Profile422 = 2, //api23
-            MPEG2ProfileHigh = 5, //api23
-            MPEG2ProfileMain = 1, //api23
-            MPEG2ProfileSNR = 3, //api23
             MPEG2ProfileSimple = 0, //api23
+            MPEG2ProfileMain = 1, //api23
+            MPEG2Profile422 = 2, //api23
+            MPEG2ProfileSNR = 3, //api23
             MPEG2ProfileSpatial = 4, //api23
+            MPEG2ProfileHigh = 5, //api23
+
             MPEG4Level0 = 1,
             MPEG4Level0b = 2,
             MPEG4Level1 = 4,
@@ -151,27 +190,29 @@ public:
             MPEG4Level4a = 64,
             MPEG4Level5 = 128,
             MPEG4Level6 = 256,
-            MPEG4ProfileAdvancedCoding = 4096,
-            MPEG4ProfileAdvancedCore = 8192,
-            MPEG4ProfileAdvancedRealTime = 1024,
-            MPEG4ProfileAdvancedScalable = 16384,
-            MPEG4ProfileAdvancedSimple = 32768,
-            MPEG4ProfileBasicAnimated = 256,
+            MPEG4ProfileSimple = 1,
+            MPEG4ProfileSimpleScalable = 2,
             MPEG4ProfileCore = 4,
-            MPEG4ProfileCoreScalable = 2048,
-            MPEG4ProfileHybrid = 512,
             MPEG4ProfileMain = 8,
             MPEG4ProfileNbit = 16,
             MPEG4ProfileScalableTexture = 32,
-            MPEG4ProfileSimple = 1,
-            MPEG4ProfileSimpleFBA = 128,
             MPEG4ProfileSimpleFace = 64,
-            MPEG4ProfileSimpleScalable = 2,
+            MPEG4ProfileSimpleFBA = 128,
+            MPEG4ProfileHybrid = 512,
+            MPEG4ProfileBasicAnimated = 256,
+            MPEG4ProfileAdvancedRealTime = 1024,
+            MPEG4ProfileCoreScalable = 2048,
+            MPEG4ProfileAdvancedCoding = 4096,
+            MPEG4ProfileAdvancedCore = 8192,
+            MPEG4ProfileAdvancedScalable = 16384,
+            MPEG4ProfileAdvancedSimple = 32768,
+
             VP8Level_Version0 = 1,
             VP8Level_Version1 = 2,
             VP8Level_Version2 = 4,
             VP8Level_Version3 = 8,
             VP8ProfileMain = 1,
+
             VP9Level1 = 1,
             VP9Level11 = 2,
             VP9Level2 = 4,
@@ -189,8 +230,8 @@ public:
             VP9Profile0 = 1,
             VP9Profile1 = 2,
             VP9Profile2 = 4,
-            VP9Profile2HDR = 4096, //api24
             VP9Profile3 = 8,
+            VP9Profile2HDR = 4096, //api24
             VP9Profile3HDR = 8192, //api24
         };
     // Fields
@@ -201,22 +242,25 @@ public:
     };
 
     // nested classes
-    class CodecCapabilities : public jmi::JObject<CodecCapabilities> {
+    class CodecCapabilities final: public jmi::JObject<CodecCapabilities> { // api16
     public:
         using Base = jmi::JObject<CodecCapabilities>;
         using Base::Base; // inherits ctors
         using jmi::JObject<CodecCapabilities>::create;
         static std::string name() { return "android/media/MediaCodecInfo$CodecCapabilities";} // required if derive from JObject<>
-        static CodecCapabilities createFromProfileLevel(const char* mime, jint profile, jint level);
-        //AudioCapabilities getAudioCapabilities() const;
-        MediaFormat getDefaultFormat() const;
-        //EncoderCapabilities getEncoderCapabilities() const;
-        jint getMaxSupportedInstances() const;
+        static CodecCapabilities createFromProfileLevel(const char* mime, jint profile, jint level); //api21
+
+        // api21: getXXXCapabilities()
+        AudioCapabilities getAudioCapabilities() const;
+        EncoderCapabilities getEncoderCapabilities() const;
+        VideoCapabilities getVideoCapabilities() const;
+
+        MediaFormat getDefaultFormat() const; // api21
+        jint getMaxSupportedInstances() const; // api23. not all devices returns a correct value, e.g. Samsung p600
         std::string getMimeType() const;
-        //VideoCapabilities getVideoCapabilities() const;
-        jboolean isFeatureRequired(const char* name) const;
-        jboolean isFeatureSupported(const char* name) const;
-        jboolean isFormatSupported(MediaFormat format) const;
+        jboolean isFeatureRequired(const char* name) const; // api21
+        jboolean isFeatureSupported(const char* name) const; // api19
+        jboolean isFormatSupported(MediaFormat format) const; //api21
     // public fields
     //Defined in the OpenMAX IL specs, color format values are drawn from OMX_COLOR_FORMATTYPE
         std::vector<jint> colorFormats() const; // assume read only.  return field<std::vector<jint>>("colorFormats").get();
