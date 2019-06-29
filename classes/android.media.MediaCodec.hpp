@@ -58,6 +58,10 @@ public:
     void start();
     void stop();
     void flush();
+    std::string getName() const; // api 18
+    void signalEndOfInputStream(); //api18
+    MediaFormat getOutputFormat() const; // never returns null
+    MediaFormat getInputFormat() const; // api 21. call after configure() to get accepted format
     void queueInputBuffer(jint index, jint offset, jint size, jlong presentationTimeUs, jint flags);
     //void queueSecureInputBuffer(jint index, jint offset, const CJNIMediaCodecCryptoInfo &info, jlong presentationTimeUs, jint flags);
     // return: index or -1
@@ -68,13 +72,9 @@ public:
     jint dequeueOutputBuffer(std::reference_wrapper<BufferInfo> info, jlong timeoutUs);
     void releaseOutputBuffer(jint index, jboolean render);
     void releaseOutputBuffer(jint index, jlong renderTimestampNs); // api 21
-    MediaFormat getOutputFormat() const; // never returns null
-    //MediaFormat getOutputFormat(jint index) const; //api 21. call after configure() to get accepted format
-    //MediaFormat getInputFormat() const; // api 21. call after configure() to get accepted format
-    std::string getName() const; // api 18
-    //void signalEndOfInputStream(); //api18
-    std::vector<java::nio::ByteBuffer> getInputBuffers(); // Deprecated as of API 21
-    std::vector<java::nio::ByteBuffer> getOutputBuffers(); // Deprecated as of API 21
+    MediaFormat getOutputFormat(jint index) const; //api 21. call after configure() to get accepted format
+    std::vector<java::nio::ByteBuffer> getInputBuffers() const; // Deprecated as of API 21
+    std::vector<java::nio::ByteBuffer> getOutputBuffers() const; // Deprecated as of API 21
     java::nio::ByteBuffer getInputBuffer(jint index) const; // API 21+
     java::nio::ByteBuffer getOutputBuffer(jint index) const; // API 21+
     void setVideoScalingMode(jint mode);
