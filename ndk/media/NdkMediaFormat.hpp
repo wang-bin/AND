@@ -54,8 +54,8 @@ constexpr static const char* AMEDIAFORMAT_KEY_CHANNEL_COUNT = "channel-count";
 constexpr static const char* AMEDIAFORMAT_KEY_CHANNEL_MASK = "channel-mask"; // 16
 constexpr static const char* AMEDIAFORMAT_KEY_COLOR_FORMAT = "color-format";
 constexpr static const char* AMEDIAFORMAT_KEY_COLOR_RANGE = "color-range"; // 24, int
-constexpr static const char* AMEDIAFORMAT_KEY_COLOR_STANDARD = "color-standard"; // 24, int
-constexpr static const char* AMEDIAFORMAT_KEY_COLOR_TRANSFER = "color-transfer"; // 24, int
+constexpr static const char* AMEDIAFORMAT_KEY_COLOR_STANDARD = "color-standard"; // 24/28, int
+constexpr static const char* AMEDIAFORMAT_KEY_COLOR_TRANSFER = "color-transfer"; // 24/28, int
 constexpr static const char* AMEDIAFORMAT_KEY_COMPLEXITY = "complexity"; // 21
 constexpr static const char* AMEDIAFORMAT_KEY_CSD = "csd";
 constexpr static const char* AMEDIAFORMAT_KEY_CSD_0 = "csd-0";
@@ -69,7 +69,7 @@ constexpr static const char* AMEDIAFORMAT_KEY_FLAC_COMPRESSION_LEVEL = "flac-com
 constexpr static const char* AMEDIAFORMAT_KEY_FRAME_RATE = "frame-rate"; // 16, int/float
 extern const char* AMEDIAFORMAT_KEY_GRID_COLUMNS;
 extern const char* AMEDIAFORMAT_KEY_GRID_ROWS;
-constexpr static const char* AMEDIAFORMAT_KEY_HDR_STATIC_INFO = "hdr-static-info"; // 24
+constexpr static const char* AMEDIAFORMAT_KEY_HDR_STATIC_INFO = "hdr-static-info"; // java24/ndk28. ByteBuffer, CTA-861.3
 constexpr static const char* AMEDIAFORMAT_KEY_HEIGHT = "height";
 constexpr static const char* AMEDIAFORMAT_KEY_INTRA_REFRESH_PERIOD = "intra-refresh-period"; // 24
 constexpr static const char* AMEDIAFORMAT_KEY_IS_ADTS = "is-adts";
@@ -104,4 +104,11 @@ extern const char* AMEDIAFORMAT_KEY_TIME_US;
 constexpr static const char* AMEDIAFORMAT_KEY_TRACK_ID = "track-id"; // 24
 extern const char* AMEDIAFORMAT_KEY_TRACK_INDEX;
 constexpr static const char* AMEDIAFORMAT_KEY_WIDTH = "width";
+
+/**************************** NDK glue code ******************************/
+/**
+ * Input objNdk is created by ndk c api, return AMediaFormat object in c++ NDKMEDIA_NS namespace
+ * Use it for async callback parameters
+ */
+AMediaFormat* fromNdk(AMediaFormat* obj);
 NDKMEDIA_NS_END

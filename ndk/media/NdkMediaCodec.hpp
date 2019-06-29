@@ -103,7 +103,8 @@ media_status_t AMediaCodec_createInputSurface(AMediaCodec*, ANativeWindow **surf
 media_status_t AMediaCodec_createPersistentInputSurface(ANativeWindow **surface); // __INTRODUCED_IN(26), java 23
 media_status_t AMediaCodec_setInputSurface(AMediaCodec*, ANativeWindow *surface); // __INTRODUCED_IN(26), java 23
 media_status_t AMediaCodec_setParameters(AMediaCodec*, const AMediaFormat* params); // __INTRODUCED_IN(26), java 19
-media_status_t AMediaCodec_signalEndOfInputStream(AMediaCodec*); // __INTRODUCED_IN(26), java 18
+// Equivalent to submitting an empty buffer with BUFFER_FLAG_END_OF_STREAM set. This may only be used with encoders receiving input from a Surface created by createInputSurface()
+media_status_t AMediaCodec_signalEndOfInputStream(AMediaCodec*); // __INTRODUCED_IN(26), java 18. Signals end-of-stream on input.
 
 // TODO: AMediaCodecCryptoInfo_new... (21)
 
@@ -154,4 +155,11 @@ bool AMediaCodecActionCode_isRecoverable(int32_t actionCode);// __INTRODUCED_IN(
  * retried at a later time.
  */
 bool AMediaCodecActionCode_isTransient(int32_t actionCode);// __INTRODUCED_IN(28);
+
+/**************************** NDK glue code ******************************/
+/**
+ * Input objNdk is created by ndk c api, return AMediaCodec object in c++ NDKMEDIA_NS namespace
+ * Use it for async callback parameters
+ */
+AMediaCodec* fromNdk(AMediaCodec* obj);
 NDKMEDIA_NS_END

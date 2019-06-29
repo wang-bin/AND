@@ -16,7 +16,6 @@ NDKMEDIA_NS_BEGIN
 using namespace jmi;
 using namespace std;
 // if function return type or parameter type is of (pointer to) ndk specified type, casting from or to ndk type is required to invoking ndk api
-extern AMediaFormat* fromNdk(AMediaFormat* obj);
 extern AMediaFormat* toNdk(const AMediaFormat* obj);
 extern AMediaFormat* fromJmi(android::media::MediaFormat&& jfmt);
 extern android::media::MediaFormat toJmi(const AMediaFormat* fmt);
