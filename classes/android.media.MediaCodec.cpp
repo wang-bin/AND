@@ -72,6 +72,8 @@ JMI_DEFINE(void, MediaCodec::releaseOutputBuffer, JMI_ARG2(jint, jlong))
 JMI_DEFINE(void, MediaCodec::setVideoScalingMode, JMI_ARG1(jint))
 JMI_DEFINE(std::vector<java::nio::ByteBuffer>, MediaCodec::getInputBuffers, JMI_ARG0())
 JMI_DEFINE(std::vector<java::nio::ByteBuffer>, MediaCodec::getOutputBuffers, JMI_ARG0())
+JMI_DEFINE_CONST(java::nio::ByteBuffer, MediaCodec::getInputBuffer, JMI_ARG1(jint))
+JMI_DEFINE_CONST(java::nio::ByteBuffer, MediaCodec::getOutputBuffer, JMI_ARG1(jint))
 } // namespace media
 } // namespace android
 } // namespace jmi

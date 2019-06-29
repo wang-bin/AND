@@ -68,15 +68,19 @@ public:
     jint dequeueOutputBuffer(std::reference_wrapper<BufferInfo> info, jlong timeoutUs);
     void releaseOutputBuffer(jint index, jboolean render);
     void releaseOutputBuffer(jint index, jlong renderTimestampNs); // api 21
-    MediaFormat getOutputFormat() const; // MediaFormat must be of type JObject subclass
+    MediaFormat getOutputFormat() const; // never returns null
+    //MediaFormat getOutputFormat(jint index) const; //api 21. call after configure() to get accepted format
+    //MediaFormat getInputFormat() const; // api 21. call after configure() to get accepted format
     std::string getName() const; // api 18
+    //void signalEndOfInputStream(); //api18
     std::vector<java::nio::ByteBuffer> getInputBuffers(); // Deprecated as of API 21
     std::vector<java::nio::ByteBuffer> getOutputBuffers(); // Deprecated as of API 21
-    /*
-    const ByteBuffer getInputBuffer(jint index); // API 21+
-    const ByteBuffer getOutputBuffer(jint index); // API 21+
-    */
+    java::nio::ByteBuffer getInputBuffer(jint index) const; // API 21+
+    java::nio::ByteBuffer getOutputBuffer(jint index) const; // API 21+
     void setVideoScalingMode(jint mode);
+    //void setParameters(Bundle params); // api21
+    //void setInputSurface(Surface surface); //api23
+    //void setOutputSurface(Surface surface); //api23
 };
 
 } // namespace media

@@ -9,6 +9,7 @@
 #include "NdkMediaCodec.hpp"
 #include "android.media.MediaCodec.hpp"
 #include <dlfcn.h>
+#include <sys/system_properties.h>
 #include <iostream>
 #include <vector>
 NDKMEDIA_NS_BEGIN
@@ -26,6 +27,7 @@ extern void* mediandk_so();
 struct AMediaCodec {
     AMediaCodec* ndk_; // what ptr type does not matter, but AMediaCodec* can simplify implementation
     android::media::MediaCodec jni_; //
+    int api_level_ = 0;
     AMediaFormat* ofmt_;
     std::string name_;
     std::vector<java::nio::ByteBuffer> inbufs_; // jni only
@@ -128,6 +130,10 @@ extern "C" jobject ANativeWindow_toSurface(JNIEnv* env, ANativeWindow* window) _
 // TODO: surface=>{surface, anw}
 media_status_t AMediaCodec_configure(AMediaCodec* obj, const AMediaFormat* format, ANativeWindow* surface, AMediaCrypto *crypto, uint32_t flags)
 {
+    char v[PROP_VALUE_MAX+1];
+    __system_property_get("ro.build.version.sdk", v); //AConfiguration_getSdkVersion
+    obj->api_level_ = std::max(atoi(v), 9); // since android 2.3, api 9
+
     void* so = mediandk_so();
     if (so) {
         static auto fp = (decltype(&AMediaCodec_configure))dlsym(so, __func__);
@@ -203,6 +209,17 @@ uint8_t* AMediaCodec_getInputBuffer(AMediaCodec* obj, size_t idx, size_t *out_si
         static auto fp = (decltype(&AMediaCodec_getInputBuffer))dlsym(so, __func__);
         return fp(obj->ndk_, idx, out_size);
     }
+    if (obj->api_level_ >= 21) {
+        const auto bb = obj->jni_.getInputBuffer((jint)idx);
+        if (!obj->jni_.error().empty()) {
+            std::clog << "AMediaCodec_getInputBuffer ERROR: " << obj->jni_.error() << std::endl;
+            return nullptr;
+        }
+        JNIEnv *env = getEnv();
+        if (out_size)
+            *out_size = env->GetDirectBufferCapacity(bb);
+        return (uint8_t*)env->GetDirectBufferAddress(bb);
+    }
     if (obj->inbufs_.empty()) {
         obj->inbufs_ = obj->jni_.getInputBuffers();
         if (!obj->jni_.error().empty()) {
@@ -228,6 +245,17 @@ uint8_t* AMediaCodec_getOutputBuffer(AMediaCodec* obj, size_t idx, size_t *out_s
     if (so) {
         static auto fp = (decltype(&AMediaCodec_getOutputBuffer))dlsym(so, __func__);
         return fp(obj->ndk_, idx, out_size);
+    }
+    if (obj->api_level_ >= 21) {
+        const auto bb = obj->jni_.getOutputBuffer((jint)idx);
+        if (!obj->jni_.error().empty()) {
+            std::clog << "AMediaCodec_getOutputBuffer ERROR: " << obj->jni_.error() << std::endl;
+            return nullptr;
+        }
+        JNIEnv *env = getEnv();
+        if (out_size)
+            *out_size = env->GetDirectBufferCapacity(bb);
+        return (uint8_t*)env->GetDirectBufferAddress(bb);
     }
     if (obj->outbufs_.empty()) {
         obj->outbufs_ = obj->jni_.getOutputBuffers();
