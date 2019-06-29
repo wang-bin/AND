@@ -93,7 +93,7 @@ media_status_t AMediaCodec_queueInputBuffer(AMediaCodec*, size_t idx, long offse
 media_status_t AMediaCodec_queueSecureInputBuffer(AMediaCodec*, size_t idx, long offset, AMediaCodecCryptoInfo*, uint64_t time, uint32_t flags);
 
 ssize_t AMediaCodec_dequeueOutputBuffer(AMediaCodec*, AMediaCodecBufferInfo *info, int64_t timeoutUs); // java 16
-AMediaFormat* AMediaCodec_getOutputFormat(AMediaCodec*); // java 16 // owned by AMediaCodec
+AMediaFormat* AMediaCodec_getOutputFormat(AMediaCodec*); // java 16. AMediaFormat_delete by user
 media_status_t AMediaCodec_releaseOutputBuffer(AMediaCodec*, size_t idx, bool render); // java 16
 media_status_t AMediaCodec_setOutputSurface(AMediaCodec*, ANativeWindow* surface); // java 23
 media_status_t AMediaCodec_releaseOutputBufferAtTime(AMediaCodec*, size_t idx, int64_t timestampNs); // java 21
@@ -112,7 +112,7 @@ media_status_t AMediaCodec_signalEndOfInputStream(AMediaCodec*); // __INTRODUCED
  * Get format of the buffer. The specified buffer index must have been previously obtained from
  * dequeueOutputBuffer.
  */
-AMediaFormat* AMediaCodec_getBufferFormat(AMediaCodec*, size_t index);// __INTRODUCED_IN(28);. java 21 getOutputFormat(int)
+AMediaFormat* AMediaCodec_getBufferFormat(AMediaCodec*, size_t index);// __INTRODUCED_IN(28);. java 21 getOutputFormat(int). AMediaFormat_delete by user
 
 media_status_t AMediaCodec_getName(AMediaCodec*, char** out_name);// __INTRODUCED_IN(28), java 18
 void AMediaCodec_releaseName(AMediaCodec*, char* name);// __INTRODUCED_IN(28). no java
@@ -140,7 +140,7 @@ media_status_t AMediaCodec_setAsyncNotifyCallback(AMediaCodec*, AMediaCodecOnAsy
  * format accepted by the codec. Do this to determine what optional configuration
  * parameters were supported by the codec.
  */
-AMediaFormat* AMediaCodec_getInputFormat(AMediaCodec*);// __INTRODUCED_IN(28); java 21
+AMediaFormat* AMediaCodec_getInputFormat(AMediaCodec*);// __INTRODUCED_IN(28); java 21. AMediaFormat_delete by user
 
 /**
  * Returns true if the codec cannot proceed further, but can be recovered by stopping,

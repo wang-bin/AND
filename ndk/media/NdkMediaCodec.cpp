@@ -28,7 +28,6 @@ struct AMediaCodec {
     AMediaCodec* ndk_; // what ptr type does not matter, but AMediaCodec* can simplify implementation
     android::media::MediaCodec jni_; //
     int api_level_ = 0;
-    AMediaFormat* ofmt_;
     std::string name_;
     std::vector<java::nio::ByteBuffer> inbufs_; // jni only
     std::vector<java::nio::ByteBuffer> outbufs_; // jni only
@@ -113,8 +112,6 @@ media_status_t AMediaCodec_delete(AMediaCodec* obj)
         delete obj;
         return ret;
     }
-    if (obj->ofmt_)
-        AMediaFormat_delete(obj->ofmt_);
     if (obj->jni_) {
         obj->jni_.release();
         if (!obj->jni_.error().empty())
@@ -336,9 +333,9 @@ AMediaFormat* AMediaCodec_getOutputFormat(AMediaCodec* obj)
         static auto fp = (decltype(&AMediaCodec_getOutputFormat))dlsym(so, __func__);
         return fromNdk(fp(obj->ndk_));
     }
-    obj->ofmt_ = fromJmi(std::move(obj->jni_.getOutputFormat()));
+    auto fmt = fromJmi(std::move(obj->jni_.getOutputFormat()));
     if (obj->jni_.error().empty())
-        return obj->ofmt_;
+        return fmt;
     std::clog << __PRETTY_FUNCTION__ << " ERROR: " << obj->jni_.error() << std::endl;
     return nullptr;
 }
