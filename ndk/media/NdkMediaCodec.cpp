@@ -16,6 +16,7 @@ NDKMEDIA_NS_BEGIN
 using namespace jmi;
 using namespace std;
 // if function return type or parameter type is of (pointer to) ndk specified type, casting from or to ndk type is required to invoking ndk api
+extern AMediaFormat* fromNdk(AMediaFormat* obj);
 extern AMediaFormat* toNdk(const AMediaFormat* obj);
 extern AMediaFormat* fromJmi(android::media::MediaFormat&& jfmt);
 extern android::media::MediaFormat toJmi(const AMediaFormat* fmt);
@@ -30,6 +31,8 @@ struct AMediaCodec {
     std::string name_;
     std::vector<java::nio::ByteBuffer> inbufs_; // jni only
     std::vector<java::nio::ByteBuffer> outbufs_; // jni only
+    AMediaCodecOnAsyncNotifyCallback async_cb_{};
+    void* async_cb_userdata_ = nullptr;
 };
 
 AMediaCodec* fromJmi(android::media::MediaCodec&& obj)
@@ -452,13 +455,32 @@ void AMediaCodec_releaseName(AMediaCodec* obj, char* name)
 media_status_t AMediaCodec_setAsyncNotifyCallback(AMediaCodec* obj, AMediaCodecOnAsyncNotifyCallback callback, void *userdata)
 { // ndk 28
     auto so = mediandk_so();
-    if (so) {
-        static auto fp = (decltype(&AMediaCodec_setAsyncNotifyCallback))dlsym(so, __func__);
-        if (!fp)
-            return AMEDIA_ERROR_UNSUPPORTED;
-        return fp(obj->ndk_, callback, userdata);
-    }
-    return AMEDIA_ERROR_UNSUPPORTED;
+    if (!so)
+        return AMEDIA_ERROR_UNSUPPORTED;
+    static auto fp = (decltype(&AMediaCodec_setAsyncNotifyCallback))dlsym(so, __func__);
+    if (!fp)
+        return AMEDIA_ERROR_UNSUPPORTED;
+    obj->async_cb_ = callback;
+    obj->async_cb_userdata_ = userdata;
+    AMediaCodecOnAsyncNotifyCallback cb;
+    // codec, format etc. in callback parameter from ndk are ndk objects, we must convert them to our c++ objects
+    cb.onAsyncInputAvailable = [](AMediaCodec *codec, void *userdata, int32_t index) {
+        auto obj = static_cast<AMediaCodec*>(userdata);
+        obj->async_cb_.onAsyncInputAvailable(fromNdk(codec), obj->async_cb_userdata_, index);
+    };
+    cb.onAsyncOutputAvailable = [](AMediaCodec *codec, void *userdata, int32_t index, AMediaCodecBufferInfo *bufferInfo) {
+        auto obj = static_cast<AMediaCodec*>(userdata);
+        obj->async_cb_.onAsyncOutputAvailable(fromNdk(codec), obj->async_cb_userdata_, index, bufferInfo);
+    };
+    cb.onAsyncFormatChanged = [](AMediaCodec *codec, void *userdata, AMediaFormat *format) {
+        auto obj = static_cast<AMediaCodec*>(userdata);
+        obj->async_cb_.onAsyncFormatChanged(fromNdk(codec), obj->async_cb_userdata_, fromNdk(format));
+    };
+    cb.onAsyncError = [](AMediaCodec *codec, void *userdata, media_status_t error, int32_t actionCode, const char *detail) {
+        auto obj = static_cast<AMediaCodec*>(userdata);
+        obj->async_cb_.onAsyncError(fromNdk(codec), obj->async_cb_userdata_, error, actionCode, detail);
+    };
+    return fp(obj->ndk_, cb, obj);
 }
 
 //media_status_t AMediaCodec_releaseCrypto(AMediaCodec*);

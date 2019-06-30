@@ -155,11 +155,4 @@ bool AMediaCodecActionCode_isRecoverable(int32_t actionCode);// __INTRODUCED_IN(
  * retried at a later time.
  */
 bool AMediaCodecActionCode_isTransient(int32_t actionCode);// __INTRODUCED_IN(28);
-
-/**************************** NDK glue code ******************************/
-/**
- * Input objNdk is created by ndk c api, return AMediaCodec object in c++ NDKMEDIA_NS namespace
- * Use it for async callback parameters
- */
-AMediaCodec* fromNdk(AMediaCodec* obj);
 NDKMEDIA_NS_END

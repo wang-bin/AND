@@ -104,11 +104,4 @@ extern const char* AMEDIAFORMAT_KEY_TIME_US;
 constexpr static const char* AMEDIAFORMAT_KEY_TRACK_ID = "track-id"; // 24
 extern const char* AMEDIAFORMAT_KEY_TRACK_INDEX;
 constexpr static const char* AMEDIAFORMAT_KEY_WIDTH = "width";
-
-/**************************** NDK glue code ******************************/
-/**
- * Input objNdk is created by ndk c api, return AMediaFormat object in c++ NDKMEDIA_NS namespace
- * Use it for async callback parameters
- */
-AMediaFormat* fromNdk(AMediaFormat* obj);
 NDKMEDIA_NS_END
