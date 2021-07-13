@@ -1,6 +1,6 @@
 /*
  * AND: Android Native Dev in Modern C++ based on JMI
- * Copyright (C) 2018-2019 Wang Bin - wbsecg1@gmail.com
+ * Copyright (C) 2018-2021 Wang Bin - wbsecg1@gmail.com
  * https://github.com/wang-bin/AND
  * https://github.com/wang-bin/JMI
  * MIT License
@@ -17,13 +17,13 @@ class MediaCodecInfo final: public jmi::JObject<MediaCodecInfo> { // inherits JO
 public:
     using Base = jmi::JObject<MediaCodecInfo>;
     using Base::Base; // inherits ctors
-    static std::string name() { return "android/media/MediaCodecInfo";} // required if derive from JObject<>
+    static constexpr auto name() { return JMISTR("android/media/MediaCodecInfo");} // required if derive from JObject<>
 
     struct AudioCapabilities final: public jmi::JObject<AudioCapabilities> { // api21
         using Base = jmi::JObject<AudioCapabilities>;
         using Base::Base; // inherits ctors
         using jmi::JObject<AudioCapabilities>::create;
-        static std::string name() { return "android/media/MediaCodecInfo$AudioCapabilities";} // required if derive from JObject<>
+        static constexpr auto name() { return JMISTR("android/media/MediaCodecInfo$AudioCapabilities");} // required if derive from JObject<>
         jboolean isSampleRateSupported(jint sampleRate) const;
         jint getMaxInputChannelCount() const;
         std::vector<jint> getSupportedSampleRates() const;
@@ -33,7 +33,7 @@ public:
         using Base = jmi::JObject<VideoCapabilities>;
         using Base::Base; // inherits ctors
         using jmi::JObject<VideoCapabilities>::create;
-        static std::string name() { return "android/media/MediaCodecInfo$VideoCapabilities";} // required if derive from JObject<>
+        static constexpr auto name() { return JMISTR("android/media/MediaCodecInfo$VideoCapabilities");} // required if derive from JObject<>
         jboolean areSizeAndRateSupported(jint width, jint height, jdouble frameRate) const;
         jboolean isSizeSupported(jint width, jint height) const;
         jint getHeightAlignment() const;
@@ -49,7 +49,7 @@ public:
         using Base = jmi::JObject<EncoderCapabilities>;
         using Base::Base; // inherits ctors
         using jmi::JObject<EncoderCapabilities>::create;
-        static std::string name() { return "android/media/MediaCodecInfo$EncoderCapabilities";} // required if derive from JObject<>
+        static constexpr auto name() { return JMISTR("android/media/MediaCodecInfo$EncoderCapabilities");} // required if derive from JObject<>
         jboolean isBitrateModeSupported(jint mode) const;
     };
 
@@ -57,7 +57,7 @@ public:
         using Base = jmi::JObject<CodecProfileLevel>;
         using Base::Base; // inherits ctors
         using jmi::JObject<CodecProfileLevel>::create;
-        static std::string name() { return "android/media/MediaCodecInfo$CodecProfileLevel";} // required if derive from JObject<>
+        static constexpr auto name() { return JMISTR("android/media/MediaCodecInfo$CodecProfileLevel");} // required if derive from JObject<>
         enum { // static field
             AACObjectMain = 1,
             AACObjectLC = 2,
@@ -247,7 +247,7 @@ public:
         using Base = jmi::JObject<CodecCapabilities>;
         using Base::Base; // inherits ctors
         using jmi::JObject<CodecCapabilities>::create;
-        static std::string name() { return "android/media/MediaCodecInfo$CodecCapabilities";} // required if derive from JObject<>
+        static constexpr auto name() { return JMISTR("android/media/MediaCodecInfo$CodecCapabilities");} // required if derive from JObject<>
         static CodecCapabilities createFromProfileLevel(const char* mime, jint profile, jint level); //api21
 
         // api21: getXXXCapabilities()

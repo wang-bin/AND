@@ -1,6 +1,6 @@
 /*
  * AND: Android Native Dev in Modern C++ based on JMI
- * Copyright (C) 2018 Wang Bin - wbsecg1@gmail.com
+ * Copyright (C) 2018-2021 Wang Bin - wbsecg1@gmail.com
  * https://github.com/wang-bin/AND
  * https://github.com/wang-bin/JMI
  * MIT License
@@ -79,7 +79,7 @@ public:
 
     using Base = jmi::JObject<AudioTrack>;
     using Base::Base; // inherits ctors
-    static std::string name() { return "android/media/AudioTrack";} // required if derive from JObject<>
+    static constexpr auto name() { return JMISTR("android/media/AudioTrack");} // required if derive from JObject<>
     static jfloat getMaxVolume();
     static jint getMinBufferSize(jint sampleRateInHz, jint channelConfig, jint audioFormat);
 

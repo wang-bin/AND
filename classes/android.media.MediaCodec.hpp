@@ -1,6 +1,6 @@
 /*
  * AND: Android Native Dev in Modern C++ based on JMI
- * Copyright (C) 2018-2019 Wang Bin - wbsecg1@gmail.com
+ * Copyright (C) 2018-2021 Wang Bin - wbsecg1@gmail.com
  * https://github.com/wang-bin/AND
  * https://github.com/wang-bin/JMI
  * MIT License
@@ -14,7 +14,7 @@
 namespace jmi {
 namespace android {
 namespace view {
-struct SurfaceTag : jmi::ClassTag { static std::string name() { return "android.view.Surface";}};
+struct SurfaceTag : jmi::ClassTag { static constexpr auto name() { return JMISTR("android.view.Surface");}};
 using Surface = JObject<SurfaceTag>;
 } // namespace view
 namespace media {
@@ -24,7 +24,7 @@ public:
         using Base = jmi::JObject<BufferInfo>;
         using Base::Base; // inherits ctors
         using jmi::JObject<BufferInfo>::create;
-        static std::string name() { return "android/media/MediaCodec$BufferInfo";} // required if derive from JObject<>
+        static constexpr auto name() { return JMISTR("android/media/MediaCodec$BufferInfo");} // required if derive from JObject<>
         // DO NOT forget to call create()
         // fields, set to new value and returns the old value. value == nullptr gets old value only
         jint offset(jint* value = nullptr);
@@ -33,7 +33,7 @@ public:
         jint flags(jint* value = nullptr);
     };
 
-    enum {                
+    enum {
         BUFFER_FLAG_KEY_FRAME = 1, // api 21
         BUFFER_FLAG_CODEC_CONFIG = 2,
         BUFFER_FLAG_END_OF_STREAM = 4,
@@ -48,7 +48,7 @@ public:
 
     using Base = jmi::JObject<MediaCodec>;
     using Base::Base; // inherits ctors
-    static std::string name() { return "android/media/MediaCodec";} // required if derive from JObject<>
+    static constexpr auto name() { return JMISTR("android/media/MediaCodec");} // required if derive from JObject<>
     static MediaCodec createDecoderByType(const char* type);
     static MediaCodec createEncoderByType(const char* type);
     static MediaCodec createByCodecName(const char* name);

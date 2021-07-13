@@ -1,6 +1,6 @@
 /*
  * AND: Android Native Dev in Modern C++ based on JMI
- * Copyright (C) 2018 Wang Bin - wbsecg1@gmail.com
+ * Copyright (C) 2018-2021 Wang Bin - wbsecg1@gmail.com
  * https://github.com/wang-bin/AND
  * https://github.com/wang-bin/JMI
  * MIT License
@@ -20,13 +20,13 @@ public:
     public:
         using Base = jmi::JObject<OnFrameAvailableListener>;
         using Base::Base; // inherits ctors
-        static std::string name() { return "android/graphics/SurfaceTexture$OnFrameAvailableListener";}
+        static constexpr auto name() { return JMISTR("android/graphics/SurfaceTexture$OnFrameAvailableListener");}
         virtual void onFrameAvailable(SurfaceTexture surfaceTexture) {} // failed to evaluatel signature if pure
     };
 
     using Base = jmi::JObject<SurfaceTexture>;
     using Base::Base; // inherits ctors
-    static std::string name() { return "android/graphics/SurfaceTexture";}
+    static constexpr auto name() { return JMISTR("android/graphics/SurfaceTexture");}
     // create: (int texName), (int texName, boolean singleBufferMode), (boolean singleBufferMode)
     void attachToGLContext(jint texName);
     void detachFromGLContext();

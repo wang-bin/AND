@@ -1,6 +1,6 @@
 /*
  * AND: Android Native Dev in Modern C++ based on JMI
- * Copyright (C) 2018 Wang Bin - wbsecg1@gmail.com
+ * Copyright (C) 2018-2021 Wang Bin - wbsecg1@gmail.com
  * https://github.com/wang-bin/AND
  * https://github.com/wang-bin/JMI
  * MIT License
@@ -16,7 +16,7 @@ class MediaCrypto : public jmi::JObject<MediaCrypto> { // inherits JObject so th
 public:
     using Base = jmi::JObject<MediaCrypto>;
     using Base::Base; // inherits ctors
-    static std::string name() { return "android/media/MediaCrypto";} // required if derive from JObject<>
+    static constexpr auto name() { return JMISTR("android/media/MediaCrypto");} // required if derive from JObject<>
     //static jboolean isCryptoSchemeSupported(UUID uuid);
     void release();
     jboolean requiresSecureDecoderComponent(const char* mime) const;
