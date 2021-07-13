@@ -6,4 +6,4 @@
 - ndk/media: libmediandk APIs(requires api level 21+) implemented for all api levels. Either use libmediandk C api directly or use JMI classes, controlled by user at runtime
 
 #### MIT License
->Copyright (c) 2016-2019 WangBin
+>Copyright (c) 2016-2021 WangBin
