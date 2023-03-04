@@ -1,6 +1,6 @@
 /*
  * AND: Android Native Dev in Modern C++ based on JMI
- * Copyright (C) 2018-2019 Wang Bin - wbsecg1@gmail.com
+ * Copyright (C) 2018-2023 Wang Bin - wbsecg1@gmail.com
  * https://github.com/wang-bin/AND
  * https://github.com/wang-bin/JMI
  * MIT License
@@ -37,7 +37,7 @@ AMediaFormat* fromJmi(android::media::MediaFormat&& obj)
 android::media::MediaFormat toJmi(const AMediaFormat* obj)
 {
     if (!obj)
-        return android::media::MediaFormat();
+        return {};
     return obj->jni_;
 }
 
@@ -268,8 +268,8 @@ void AMediaFormat_setDouble(AMediaFormat* obj, const char* name, double value)
     void* so = mediandk_so();
     if (!so)
         return;
-    static auto fp = (decltype(&AMediaFormat_setDouble))dlsym(so, __func__);
-    if (!fp)
+    static const auto fp = (decltype(&AMediaFormat_setDouble))dlsym(so, __func__);
+    if (fp)
         fp(obj->ndk_, name, value);
 }
 
