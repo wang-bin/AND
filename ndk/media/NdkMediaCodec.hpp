@@ -1,7 +1,7 @@
 
 /*
  * AND: Android Native Dev in Modern C++ based on JMI
- * Copyright (C) 2018-2019 Wang Bin - wbsecg1@gmail.com
+ * Copyright (C) 2018-2023 Wang Bin - wbsecg1@gmail.com
  * https://github.com/wang-bin/AND
  * https://github.com/wang-bin/JMI
  * MIT License
@@ -12,6 +12,7 @@
 #include "NdkMediaCrypto.hpp"
 #include "NdkMediaFormat.hpp"
 #include <android/native_window.h>
+#include <jni.h>
 #include <sys/cdefs.h>
 #include <sys/types.h>
 
@@ -29,7 +30,7 @@ struct AMediaCodecBufferInfo {
 typedef struct AMediaCodecBufferInfo AMediaCodecBufferInfo;
 typedef struct AMediaCodecCryptoInfo AMediaCodecCryptoInfo;
 
-enum {                
+enum {
     //AMEDIACODEC_BUFFER_FLAG_KEY_FRAME = 1,
     AMEDIACODEC_BUFFER_FLAG_CODEC_CONFIG = 2,
     AMEDIACODEC_BUFFER_FLAG_END_OF_STREAM = 4,
@@ -80,7 +81,12 @@ AMediaCodec* AMediaCodec_createDecoderByType(const char *mime_type);
 AMediaCodec* AMediaCodec_createEncoderByType(const char *mime_type);
 media_status_t AMediaCodec_delete(AMediaCodec*);
 // surface: jni accepts Surface jobject instead of ANativeWindow*
-media_status_t AMediaCodec_configure(AMediaCodec*, const AMediaFormat* format, ANativeWindow* surface, AMediaCrypto *crypto, uint32_t flags);
+struct ANativeWindowOrSurface {
+    ANativeWindow* window = nullptr;
+    jobject surface = nullptr;
+};
+// const ANativeWindowOrSurface&: same address as ANativeWindow*
+media_status_t AMediaCodec_configure(AMediaCodec*, const AMediaFormat* format, const ANativeWindowOrSurface& ws, AMediaCrypto *crypto, uint32_t flags);
 media_status_t AMediaCodec_start(AMediaCodec*);
 media_status_t AMediaCodec_stop(AMediaCodec*);
 media_status_t AMediaCodec_flush(AMediaCodec*);
@@ -102,6 +108,8 @@ media_status_t AMediaCodec_releaseOutputBufferAtTime(AMediaCodec*, size_t idx, i
 media_status_t AMediaCodec_createInputSurface(AMediaCodec*, ANativeWindow **surface); // __INTRODUCED_IN(26), java 18
 media_status_t AMediaCodec_createPersistentInputSurface(ANativeWindow **surface); // __INTRODUCED_IN(26), java 23
 media_status_t AMediaCodec_setInputSurface(AMediaCodec*, ANativeWindow *surface); // __INTRODUCED_IN(26), java 23
+// Parameters can be communicated only when the codec is running. after start()
+// vendor.dolby.dialog-enhancement-gain.value: -1~9. https://github.com/google/ExoPlayer/pull/10134/files
 media_status_t AMediaCodec_setParameters(AMediaCodec*, const AMediaFormat* params); // __INTRODUCED_IN(26), java 19
 // Equivalent to submitting an empty buffer with BUFFER_FLAG_END_OF_STREAM set. This may only be used with encoders receiving input from a Surface created by createInputSurface()
 media_status_t AMediaCodec_signalEndOfInputStream(AMediaCodec*); // __INTRODUCED_IN(26), java 18. Signals end-of-stream on input.
