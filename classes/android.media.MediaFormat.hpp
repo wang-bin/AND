@@ -1,11 +1,10 @@
 /*
  * AND: Android Native Dev in Modern C++ based on JMI
- * Copyright (C) 2018-2021 Wang Bin - wbsecg1@gmail.com
+ * Copyright (C) 2018-2025 Wang Bin - wbsecg1@gmail.com
  * https://github.com/wang-bin/AND
  * https://github.com/wang-bin/JMI
  * MIT License
  */
-
 #pragma once
 #include "jmi/jmi.h"
 #include "java.nio.ByteBuffer.hpp"
@@ -15,6 +14,21 @@ namespace android {
 namespace media {
 class MediaFormat : public jmi::JObject<MediaFormat> { // inherits JObject so that it can be a return type like primitive types
 public:
+    enum {
+        COLOR_RANGE_FULL = 1,
+        COLOR_RANGE_LIMITED = 2,
+
+        COLOR_STANDARD_BT709 = 1,
+        COLOR_STANDARD_BT601_PAL = 2,
+        COLOR_STANDARD_BT601_NTSC = 4,
+        COLOR_STANDARD_BT2020 = 6,
+
+        COLOR_TRANSFER_LINEAR = 1,
+        COLOR_TRANSFER_SDR_VIDEO = 3,
+        COLOR_TRANSFER_ST2084 = 6,
+        COLOR_TRANSFER_HLG = 7,
+    };
+
     using Base = jmi::JObject<MediaFormat>;
     using Base::Base; // inherits ctors
     static constexpr auto name() { return JMISTR("android/media/MediaFormat");} // required if derive from JObject<>
@@ -39,7 +53,7 @@ public:
     constexpr static const char* KEY_CHANNEL_COUNT = "channel-count";
     constexpr static const char* KEY_CHANNEL_MASK = "channel-mask";
     constexpr static const char* KEY_COLOR_FORMAT = "color-format";
-    constexpr static const char* KEY_CSD = "csd"; // ?
+    constexpr static const char* KEY_CSD = "csd"; // codec specified data
     constexpr static const char* KEY_CSD_0 = "csd-0"; // ?
     constexpr static const char* KEY_CSD_1 = "csd-1"; // ?
     constexpr static const char* KEY_CSD_2 = "csd-2"; // ?

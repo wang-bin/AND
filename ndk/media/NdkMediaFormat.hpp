@@ -1,6 +1,6 @@
 /*
  * AND: Android Native Dev in Modern C++ based on JMI
- * Copyright (C) 2018-2019 Wang Bin - wbsecg1@gmail.com
+ * Copyright (C) 2018-2025 Wang Bin - wbsecg1@gmail.com
  * https://github.com/wang-bin/AND
  * https://github.com/wang-bin/JMI
  * MIT License
@@ -52,7 +52,7 @@ constexpr static const char* AMEDIAFORMAT_KEY_BIT_RATE = "bitrate"; // 16
 constexpr static const char* AMEDIAFORMAT_KEY_CAPTURE_RATE = "capture-rate"; // 21
 constexpr static const char* AMEDIAFORMAT_KEY_CHANNEL_COUNT = "channel-count";
 constexpr static const char* AMEDIAFORMAT_KEY_CHANNEL_MASK = "channel-mask"; // 16
-constexpr static const char* AMEDIAFORMAT_KEY_COLOR_FORMAT = "color-format";
+constexpr static const char* AMEDIAFORMAT_KEY_COLOR_FORMAT = "color-format"; // android._color-format
 constexpr static const char* AMEDIAFORMAT_KEY_COLOR_RANGE = "color-range"; // 24, int
 constexpr static const char* AMEDIAFORMAT_KEY_COLOR_STANDARD = "color-standard"; // 24/28, int
 constexpr static const char* AMEDIAFORMAT_KEY_COLOR_TRANSFER = "color-transfer"; // 24/28, int
@@ -69,7 +69,9 @@ constexpr static const char* AMEDIAFORMAT_KEY_FLAC_COMPRESSION_LEVEL = "flac-com
 constexpr static const char* AMEDIAFORMAT_KEY_FRAME_RATE = "frame-rate"; // 16, int/float
 extern const char* AMEDIAFORMAT_KEY_GRID_COLUMNS;
 extern const char* AMEDIAFORMAT_KEY_GRID_ROWS;
+// KEY_HDR10_PLUS_INFO
 constexpr static const char* AMEDIAFORMAT_KEY_HDR_STATIC_INFO = "hdr-static-info"; // java24/ndk28. ByteBuffer, CTA-861.3
+constexpr static const char* AMEDIAFORMAT_KEY_HDR10_PLUS_INFO = "hdr10-plus-info"; // java29/ndk31
 constexpr static const char* AMEDIAFORMAT_KEY_HEIGHT = "height";
 constexpr static const char* AMEDIAFORMAT_KEY_INTRA_REFRESH_PERIOD = "intra-refresh-period"; // 24
 constexpr static const char* AMEDIAFORMAT_KEY_IS_ADTS = "is-adts";
@@ -86,8 +88,8 @@ constexpr static const char* AMEDIAFORMAT_KEY_MAX_WIDTH = "max-width"; // 19
 constexpr static const char* AMEDIAFORMAT_KEY_MIME = "mime";
 extern const char* AMEDIAFORMAT_KEY_MPEG_USER_DATA;
 constexpr static const char* AMEDIAFORMAT_KEY_OPERATING_RATE = "operating-rate";
-constexpr static const char* AMEDIAFORMAT_KEY_PCM_ENCODING = "pcm-encoding";
-extern const char* AMEDIAFORMAT_KEY_PRIORITY; // 23
+constexpr static const char* AMEDIAFORMAT_KEY_PCM_ENCODING = "pcm-encoding"; // 28
+constexpr static const char* AMEDIAFORMAT_KEY_PRIORITY = "priority"; // 23
 constexpr static const char* AMEDIAFORMAT_KEY_PROFILE = "profile"; // 21
 constexpr static const char* AMEDIAFORMAT_KEY_PUSH_BLANK_BUFFERS_ON_STOP = "push-blank-buffers-on-shutdown"; // 19
 constexpr static const char* AMEDIAFORMAT_KEY_REPEAT_PREVIOUS_FRAME_AFTER = "repeat-previous-frame-after"; // 19
@@ -96,7 +98,7 @@ constexpr static const char* AMEDIAFORMAT_KEY_SAMPLE_RATE = "sample-rate";
 extern const char* AMEDIAFORMAT_KEY_SEI;
 constexpr static const char* AMEDIAFORMAT_KEY_SLICE_HEIGHT = "slice-height";
 constexpr static const char* AMEDIAFORMAT_KEY_STRIDE = "stride";
-extern const char* AMEDIAFORMAT_KEY_TEMPORAL_LAYER_ID;                                                                                                                            
+extern const char* AMEDIAFORMAT_KEY_TEMPORAL_LAYER_ID;
 constexpr static const char* AMEDIAFORMAT_KEY_TEMPORAL_LAYERING = "ts-schema"; // 21
 extern const char* AMEDIAFORMAT_KEY_TILE_HEIGHT;
 extern const char* AMEDIAFORMAT_KEY_TILE_WIDTH;
@@ -104,4 +106,17 @@ extern const char* AMEDIAFORMAT_KEY_TIME_US;
 constexpr static const char* AMEDIAFORMAT_KEY_TRACK_ID = "track-id"; // 24
 extern const char* AMEDIAFORMAT_KEY_TRACK_INDEX;
 constexpr static const char* AMEDIAFORMAT_KEY_WIDTH = "width";
+
+
+// 28
+// KEY_QUALITY
+
+// android 31
+// KEY_VIDEO_QP_MAX/MIN(video-qp-min), KEY_VIDEO_QP_{I,B,P}_{MAX,MIN}
+
+// KEY_VIDEO_QP_AVERAGE
+
+// 30
+constexpr const char* AMEDIAFORMAT_KEY_LOW_LATENCY = "low-latency"; // decoder only
+
 NDKMEDIA_NS_END

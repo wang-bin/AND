@@ -1,6 +1,6 @@
 /*
  * AND: Android Native Dev in Modern C++ based on JMI
- * Copyright (C) 2018-2021 Wang Bin - wbsecg1@gmail.com
+ * Copyright (C) 2018-2022 Wang Bin - wbsecg1@gmail.com
  * https://github.com/wang-bin/AND
  * https://github.com/wang-bin/JMI
  * MIT License
@@ -25,8 +25,8 @@ public:
     // DO NOT forget to call create(int kind) for api21
     static jint getCodecCount(); // deprecated in api21. Use getCodecInfos() instead
     static MediaCodecInfo getCodecInfoAt(int index); // deprecated in api21. Use getCodecInfos() instead
-    std::string findDecoderForFormat(MediaFormat format) const; // return string instead of char*
-    std::string findEncoderForFormat(MediaFormat format) const;
+    std::string findDecoderForFormat(const MediaFormat& format) const; // return string instead of char*
+    std::string findEncoderForFormat(const MediaFormat& format) const;
     std::vector<MediaCodecInfo> getCodecInfos() const; // api21
 };
 } // namespace media

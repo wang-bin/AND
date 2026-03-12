@@ -1,6 +1,6 @@
 /*
  * AND: Android Native Dev in Modern C++ based on JMI
- * Copyright (C) 2018-2023 Wang Bin - wbsecg1@gmail.com
+ * Copyright (C) 2018-2025 Wang Bin - wbsecg1@gmail.com
  * https://github.com/wang-bin/AND
  * https://github.com/wang-bin/JMI
  * MIT License
@@ -62,7 +62,7 @@ AMediaFormat *AMediaFormat_new() {
             return nullptr;
         return fromJmi(std::move(obj));
     }
-    static auto fp = (decltype(&AMediaFormat_new))dlsym(mediandk_so(), __func__);
+    static const auto fp = (decltype(&AMediaFormat_new))dlsym(mediandk_so(), __func__);
     return fromNdk(fp());
 }
 
@@ -74,8 +74,8 @@ media_status_t AMediaFormat_delete(AMediaFormat* obj) {
         delete obj;
         return AMEDIA_OK;
     }
-    static auto fp = (decltype(&AMediaFormat_delete))dlsym(so, __func__);
-    auto ret = fp(obj->ndk_);
+    static const auto fp = (decltype(&AMediaFormat_delete))dlsym(so, __func__);
+    const auto ret = fp(obj->ndk_);
     delete obj;
     return ret;
 }
@@ -83,13 +83,15 @@ media_status_t AMediaFormat_delete(AMediaFormat* obj) {
 const char* AMediaFormat_toString(AMediaFormat* obj) {
     void* so = mediandk_so();
     if (so) {
-        static auto fp = (decltype(&AMediaFormat_toString))dlsym(so, __func__);
+        static const auto fp = (decltype(&AMediaFormat_toString))dlsym(so, __func__);
+// MediaFormat: {crop-right=255, max-height=240, sar-width=1, color-format=2130708361, mime=video/raw, hdr-static-info=java.nio.HeapByteBuffer[pos=0 lim=25 cap=25], color-standard=6, color-transfer=6, sar-height=1, hdr10-plus-info=java.nio.HeapByteBuffer[pos=0 lim=0 cap=0], crop-bottom=143, max-width=320, crop-left=0, width=256, color-range=2, crop-top=0, rotation-degrees=0, height=144}
         return fp(obj->ndk_);
     }
+// MediaFormat: android._color-format: int32(2130708361), android._video-scaling: int32(1), android._dataspace: int32(298188800), color-standard: int32(6), color-range: int32(2), color-transfer: int32(6), sar-height: int32(1), rotation-degrees: int32(0), hdr-static-info: data, sar-width: int32(1), crop: Rect(0, 0, 255, 143), width: int32(256), hdr10-plus-info: data, height: int32(144), max-height: int32(240), max-width: int32(320), mime: string(video/raw), color-format: int32(2130708361)}
     obj->str_ = obj->jni_.toString(); // owned by format
     if (obj->jni_.error().empty())
         return obj->str_.data();
-    std::clog << __func__ << " ERROR: " << obj->jni_.error() << std::endl;
+    clog << __func__ << " ERROR: " + obj->jni_.error() << endl;
     return nullptr;
 }
 
@@ -97,7 +99,7 @@ bool AMediaFormat_getInt32(AMediaFormat* obj, const char *name, int32_t *out)
 {
     void* so = mediandk_so();
     if (so) {
-        static void* fp = dlsym(so, __func__);
+        static const void* fp = dlsym(so, __func__);
         return decltype(&AMediaFormat_getInt32)(fp)(obj->ndk_, name, out);
     }
     if (!obj->jni_.containsKey(name))
@@ -105,7 +107,7 @@ bool AMediaFormat_getInt32(AMediaFormat* obj, const char *name, int32_t *out)
     *out = obj->jni_.getInteger(name);
     if (obj->jni_.error().empty())
         return true;
-    std::clog << __func__ << " ERROR: " << obj->jni_.error() << std::endl;
+    clog << __func__ << " ERROR: " + obj->jni_.error() << endl;
     return false;
 }
 
@@ -113,7 +115,7 @@ bool AMediaFormat_getInt64(AMediaFormat* obj, const char *name, int64_t *out)
 {
     void* so = mediandk_so();
     if (so) {
-        static void* fp = dlsym(mediandk_so(), __func__);
+        static const void* fp = dlsym(mediandk_so(), __func__);
         return decltype(&AMediaFormat_getInt64)(fp)(obj->ndk_, name, out);
     }
     if (!obj->jni_.containsKey(name))
@@ -121,7 +123,7 @@ bool AMediaFormat_getInt64(AMediaFormat* obj, const char *name, int64_t *out)
     *out = obj->jni_.getLong(name);
     if (obj->jni_.error().empty())
         return true;
-    std::clog << __func__ << " ERROR: " << obj->jni_.error() << std::endl;
+    clog << __func__ << " ERROR: " + obj->jni_.error() << endl;
     return false;
 }
 
@@ -129,7 +131,7 @@ bool AMediaFormat_getFloat(AMediaFormat* obj, const char *name, float *out)
 {
     void* so = mediandk_so();
     if (so) {
-        static void* fp = dlsym(mediandk_so(), __func__);
+        static const void* fp = dlsym(mediandk_so(), __func__);
         return decltype(&AMediaFormat_getFloat)(fp)(obj->ndk_, name, out);
     }
     if (!obj->jni_.containsKey(name))
@@ -137,7 +139,7 @@ bool AMediaFormat_getFloat(AMediaFormat* obj, const char *name, float *out)
     *out = obj->jni_.getFloat(name);
     if (obj->jni_.error().empty())
         return true;
-    std::clog << __func__ << " ERROR: " << obj->jni_.error() << std::endl;
+    clog << __func__ << " ERROR: " + obj->jni_.error() << endl;
     return false;
 }
 
@@ -145,14 +147,14 @@ bool AMediaFormat_getBuffer(AMediaFormat* obj, const char *name, void** data, si
 {
     void* so = mediandk_so();
     if (so) {
-        static void* fp = dlsym(mediandk_so(), __func__);
+        static const void* fp = dlsym(mediandk_so(), __func__);
         return decltype(&AMediaFormat_getBuffer)(fp)(obj->ndk_, name, data, size);
     }
     if (!obj->jni_.containsKey(name))
         return false;
     auto ret = obj->jni_.getByteBuffer(name);
     if (!obj->jni_.error().empty()) {
-        std::clog << __func__ << " ERROR: " << obj->jni_.error() << std::endl;
+        clog << __func__ << " ERROR: " + obj->jni_.error() << endl;
         return false;
     }
     JNIEnv *env = getEnv();
@@ -165,7 +167,7 @@ bool AMediaFormat_getString(AMediaFormat* obj, const char *name, const char **ou
 {
     void* so = mediandk_so();
     if (so) {
-        static auto fp = (decltype(&AMediaFormat_getString))dlsym(so, __func__);
+        static const auto fp = (decltype(&AMediaFormat_getString))dlsym(so, __func__);
         return fp(obj->ndk_, name, out);
     }
     if (!obj->jni_.containsKey(name))
@@ -175,7 +177,7 @@ bool AMediaFormat_getString(AMediaFormat* obj, const char *name, const char **ou
     if (obj->jni_.error().empty())
         return true;
     *out = nullptr;
-    std::clog << __func__ << " ERROR: " << obj->jni_.error() << std::endl;
+    clog << __func__ << " ERROR: " + obj->jni_.error() << endl;
     return false;
 }
 
@@ -183,62 +185,62 @@ void AMediaFormat_setInt32(AMediaFormat* obj, const char* name, int32_t value)
 {
     void* so = mediandk_so();
     if (so) {
-        static auto fp = (decltype(&AMediaFormat_setInt32))dlsym(so, __func__);
+        static const auto fp = (decltype(&AMediaFormat_setInt32))dlsym(so, __func__);
         return fp(obj->ndk_, name, value);
     }
     obj->jni_.setInteger(name, value);
     if (!obj->jni_.error().empty())
-        std::clog << __func__ << " ERROR: " << obj->jni_.error() << std::endl;
+        clog << __func__ << " ERROR: " + obj->jni_.error() << endl;
 }
 
 void AMediaFormat_setInt64(AMediaFormat* obj, const char* name, int64_t value)
 {
     void* so = mediandk_so();
     if (so) {
-        static auto fp = (decltype(&AMediaFormat_setInt64))dlsym(so, __func__);
+        static const auto fp = (decltype(&AMediaFormat_setInt64))dlsym(so, __func__);
         return fp(obj->ndk_, name, value);
     }
     obj->jni_.setLong(name, value);
     if (!obj->jni_.error().empty())
-        std::clog << __func__ << " ERROR: " << obj->jni_.error() << std::endl;
+        clog << __func__ << " ERROR: " + obj->jni_.error() << endl;
 }
 
 void AMediaFormat_setFloat(AMediaFormat* obj, const char* name, float value)
 {
     void* so = mediandk_so();
     if (so) {
-        static auto fp = (decltype(&AMediaFormat_setFloat))dlsym(so, __func__);
+        static const auto fp = (decltype(&AMediaFormat_setFloat))dlsym(so, __func__);
         return fp(obj->ndk_, name, value);
     }
     obj->jni_.setFloat(name, value);
     if (!obj->jni_.error().empty())
-        std::clog << __func__ << " ERROR: " << obj->jni_.error() << std::endl;
+        clog << __func__ << " ERROR: " + obj->jni_.error() << endl;
 }
 
 void AMediaFormat_setString(AMediaFormat* obj, const char* name, const char* value)
 {
     void* so = mediandk_so();
     if (so) {
-        static auto fp = (decltype(&AMediaFormat_setString))dlsym(so, __func__);
+        static const auto fp = (decltype(&AMediaFormat_setString))dlsym(so, __func__);
         return fp(obj->ndk_, name, value);
     }
     obj->jni_.setString(name, value);
     if (!obj->jni_.error().empty())
-        std::clog << __func__ << " ERROR: " << obj->jni_.error() << std::endl;
+        clog << __func__ << " ERROR: " + obj->jni_.error() << endl;
 }
 
 void AMediaFormat_setBuffer(AMediaFormat* obj, const char* name, void* data, size_t size)
 {
     void* so = mediandk_so();
     if (so) {
-        static auto fp = (decltype(&AMediaFormat_setBuffer))dlsym(so, __func__);
+        static const auto fp = (decltype(&AMediaFormat_setBuffer))dlsym(so, __func__);
         fp(obj->ndk_, name, data, size);
         return;
     }
-    LocalRef dbb = getEnv()->NewDirectByteBuffer(data, size);
+    LocalRef dbb = getEnv()->NewDirectByteBuffer(data, (jlong)size);
     obj->jni_.setByteBuffer(name, java::nio::ByteBuffer(std::move(dbb)));
     if (!obj->jni_.error().empty())
-        std::clog << __func__ << " ERROR: " << obj->jni_.error() << std::endl;
+        clog << __func__ << " ERROR: " + obj->jni_.error() << endl;
 }
 
 bool AMediaFormat_getDouble(AMediaFormat* obj, const char *name, double *out)
@@ -246,7 +248,7 @@ bool AMediaFormat_getDouble(AMediaFormat* obj, const char *name, double *out)
     void* so = mediandk_so();
     if (!so)
         return false;
-    static auto fp = (decltype(&AMediaFormat_getDouble))dlsym(so, __func__);
+    static const auto fp = (decltype(&AMediaFormat_getDouble))dlsym(so, __func__);
     if (!fp)
         return false;
     return fp(obj->ndk_, name, out);
@@ -257,7 +259,7 @@ bool AMediaFormat_getRect(AMediaFormat* obj, const char *name, int32_t *left, in
     void* so = mediandk_so();
     if (!so)
         return false;
-    static auto fp = (decltype(&AMediaFormat_getRect))dlsym(so, __func__);
+    static const auto fp = (decltype(&AMediaFormat_getRect))dlsym(so, __func__);
     if (!fp)
         return false;
     return fp(obj->ndk_, name, left, top, right, bottom);
@@ -278,7 +280,7 @@ void AMediaFormat_setSize(AMediaFormat* obj, const char* name, size_t value)
     void* so = mediandk_so();
     if (!so)
         return;
-    static auto fp = (decltype(&AMediaFormat_setSize))dlsym(so, __func__);
+    static const auto fp = (decltype(&AMediaFormat_setSize))dlsym(so, __func__);
     if (fp)
         return fp(obj->ndk_, name, value);
 }
@@ -288,7 +290,7 @@ void AMediaFormat_setRect(AMediaFormat* obj, const char* name, int32_t left, int
     void* so = mediandk_so();
     if (!so)
         return;
-    static auto fp = (decltype(&AMediaFormat_setRect))dlsym(so, __func__);
+    static const auto fp = (decltype(&AMediaFormat_setRect))dlsym(so, __func__);
     if (fp)
         return fp(obj->ndk_, name, left, top, right, bottom);
 }

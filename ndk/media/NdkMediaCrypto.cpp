@@ -1,6 +1,6 @@
 /*
  * AND: Android Native Dev in Modern C++ based on JMI
- * Copyright (C) 2018-2019 Wang Bin - wbsecg1@gmail.com
+ * Copyright (C) 2018-2022 Wang Bin - wbsecg1@gmail.com
  * https://github.com/wang-bin/AND
  * https://github.com/wang-bin/JMI
  * MIT License
@@ -27,7 +27,7 @@ AMediaCrypto* fromJmi(android::media::MediaCrypto&& jfmt)
 android::media::MediaCrypto toJmi(const AMediaCrypto* obj)
 {
     if (!obj)
-        return android::media::MediaCrypto();
+        return {};
     return obj->jni_;
 }
 

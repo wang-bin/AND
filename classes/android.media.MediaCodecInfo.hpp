@@ -1,6 +1,6 @@
 /*
  * AND: Android Native Dev in Modern C++ based on JMI
- * Copyright (C) 2018-2021 Wang Bin - wbsecg1@gmail.com
+ * Copyright (C) 2018-2023 Wang Bin - wbsecg1@gmail.com
  * https://github.com/wang-bin/AND
  * https://github.com/wang-bin/JMI
  * MIT License
@@ -37,11 +37,13 @@ public:
         jboolean areSizeAndRateSupported(jint width, jint height, jdouble frameRate) const;
         jboolean isSizeSupported(jint width, jint height) const;
         jint getHeightAlignment() const;
-        jint getWidthAlignment() const;
+        jint getWidthAlignment() const;// POT
+        //Range<Integer> getSupportedFrameRates() const
+        // Range<Double> getSupportedFrameRatesFor(int width, int height)
     };
 
     struct EncoderCapabilities final: public jmi::JObject<EncoderCapabilities> { // api21
-        enum {
+        enum Value {
             BITRATE_MODE_CQ = 0,
             BITRATE_MODE_VBR = 1,
             BITRATE_MODE_CBR = 2,
@@ -58,7 +60,7 @@ public:
         using Base::Base; // inherits ctors
         using jmi::JObject<CodecProfileLevel>::create;
         static constexpr auto name() { return JMISTR("android/media/MediaCodecInfo$CodecProfileLevel");} // required if derive from JObject<>
-        enum { // static field
+        enum Value { // static field
             AACObjectMain = 1,
             AACObjectLC = 2,
             AACObjectSSR = 3,
@@ -167,6 +169,7 @@ public:
             HEVCProfileMain10 = 2,
             HEVCProfileMainStill = 4, //api28
             HEVCProfileMain10HDR10 = 4096, // api24
+            HEVCProfileMain10HDR10Plus = 8192, // api29
 
             MPEG2LevelLL = 0, //api23
             MPEG2LevelML = 1, //api23
@@ -231,8 +234,10 @@ public:
             VP9Profile1 = 2,
             VP9Profile2 = 4,
             VP9Profile3 = 8,
-            VP9Profile2HDR = 4096, //api24
-            VP9Profile3HDR = 8192, //api24
+            VP9Profile2HDR = 4096, //api24. 420 10bit
+            VP9Profile3HDR = 8192, //api24. 422 10bit
+            VP9Profile2HDR10Plus = 16384, //api29. 420 10bit
+            VP9Profile3HDR10Plus = 32768, //api29. 422 10bit
         };
     // Fields
     //Defined in the OpenMAX IL specs, depending on the type of media this can be OMX_VIDEO_AVCLEVELTYPE, OMX_VIDEO_H263LEVELTYPE OMX_VIDEO_MPEG4LEVELTYPE, OMX_VIDEO_VP8LEVELTYPE or OMX_VIDEO_VP9LEVELTYPE
@@ -260,7 +265,7 @@ public:
         std::string getMimeType() const;
         jboolean isFeatureRequired(const char* name) const; // api21
         jboolean isFeatureSupported(const char* name) const; // api19
-        jboolean isFormatSupported(MediaFormat format) const; //api21
+        jboolean isFormatSupported(const MediaFormat& format) const; //api21
     // public fields
     //Defined in the OpenMAX IL specs, color format values are drawn from OMX_COLOR_FORMATTYPE
         std::vector<jint> colorFormats() const; // assume read only.  return field<std::vector<jint>>("colorFormats").get();
@@ -271,6 +276,12 @@ public:
     std::string getName() const;
     std::vector<std::string> getSupportedTypes() const;
     jboolean isEncoder() const;
+    // api level 29 begin
+    std::string getCanonicalName() const; // This method returns the name of the underlying codec name, which must not be another alias. For non-aliases this is always the name of the codec
+    jboolean isAlias() const; // Query if the codec is an alias for another underlying codec.
+    jboolean isHardwareAccelerated() const;
+    jboolean isSoftwareOnly() const;
+    jboolean isVendor() const; // Query if the codec is provided by the Android platform (false) or the device manufacturer (true).
 protected:
     // create
 };

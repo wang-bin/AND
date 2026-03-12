@@ -1,6 +1,6 @@
 /*
  * AND: Android Native Dev in Modern C++ based on JMI
- * Copyright (C) 2018-2019 Wang Bin - wbsecg1@gmail.com
+ * Copyright (C) 2018-2023 Wang Bin - wbsecg1@gmail.com
  * https://github.com/wang-bin/AND
  * https://github.com/wang-bin/JMI
  * MIT License
@@ -52,7 +52,7 @@ JMI_DEFINE_CONST(jint,  MediaCodecInfo::CodecCapabilities::getMaxSupportedInstan
 JMI_DEFINE_CONST(std::string,  MediaCodecInfo::CodecCapabilities::getMimeType, JMI_ARG0())
 JMI_DEFINE_CONST(jboolean,  MediaCodecInfo::CodecCapabilities::isFeatureRequired, JMI_ARG1(const char*))
 JMI_DEFINE_CONST(jboolean,  MediaCodecInfo::CodecCapabilities::isFeatureSupported, JMI_ARG1(const char*))
-JMI_DEFINE_CONST(jboolean,  MediaCodecInfo::CodecCapabilities::isFormatSupported, JMI_ARG1(MediaFormat))
+JMI_DEFINE_CONST(jboolean,  MediaCodecInfo::CodecCapabilities::isFormatSupported, JMI_ARG1(const MediaFormat&))
 JMI_DEFINE_CONST(MediaCodecInfo::CodecCapabilities, MediaCodecInfo::getCapabilitiesForType, JMI_ARG1(const char*))
 JMI_DEFINE_CONST(std::string, MediaCodecInfo::getName, JMI_ARG0())
 JMI_DEFINE_CONST(std::vector<std::string>, MediaCodecInfo::getSupportedTypes, JMI_ARG0())
@@ -68,6 +68,12 @@ JMI_DEFINE_CONST(jint,  MediaCodecInfo::VideoCapabilities::getHeightAlignment, J
 JMI_DEFINE_CONST(jint,  MediaCodecInfo::VideoCapabilities::getWidthAlignment, JMI_ARG0())
 
 JMI_DEFINE_CONST(jboolean,  MediaCodecInfo::EncoderCapabilities::isBitrateModeSupported, JMI_ARG1(jint))
+
+JMI_DEFINE_CONST(std::string,  MediaCodecInfo::getCanonicalName, JMI_ARG0())
+JMI_DEFINE_CONST(jboolean,  MediaCodecInfo::isAlias, JMI_ARG0())
+JMI_DEFINE_CONST(jboolean,  MediaCodecInfo::isHardwareAccelerated, JMI_ARG0())
+JMI_DEFINE_CONST(jboolean,  MediaCodecInfo::isSoftwareOnly, JMI_ARG0())
+JMI_DEFINE_CONST(jboolean,  MediaCodecInfo::isVendor, JMI_ARG0())
 } // namespace media
 } // namespace android
 } // namespace jmi

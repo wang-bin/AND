@@ -32,7 +32,7 @@ enum {
     CHANNEL_OUT_QUAD = 0xcc,
     CHANNEL_OUT_SURROUND = 0x41c,
     CHANNEL_OUT_5POINT1 = 0xfc,
-    CHANNEL_OUT_7POINT1 = 0x3fc,
+    CHANNEL_OUT_7POINT1 = 0x3fc, // deprecated in api 23
     CHANNEL_OUT_FRONT_LEFT = 0x4,
     CHANNEL_OUT_FRONT_RIGHT = 0x8,
     CHANNEL_OUT_FRONT_CENTER = 0x10,
@@ -44,7 +44,7 @@ enum {
     CHANNEL_OUT_FRONT_RIGHT_OF_CENTER = 0x200,
     CHANNEL_OUT_SIDE_LEFT = 0x00000800, // api 21
     CHANNEL_OUT_SIDE_RIGHT = 0x00001000, // api 21
-    CHANNEL_OUT_7POINT1_SURROUND = 0x000018fc, // api 23
+    CHANNEL_OUT_7POINT1_SURROUND = 0x000018fc, // api 23. use deprecated CHANNEL_OUT_7POINT1 will result in AudipTrack construct error
     ENCODING_INVALID = 0x0,
     ENCODING_DEFAULT = 0x1,
     ENCODING_PCM_16BIT = 0x2,
@@ -82,7 +82,7 @@ public:
     static constexpr auto name() { return JMISTR("android/media/AudioTrack");} // required if derive from JObject<>
     static jfloat getMaxVolume();
     static jint getMinBufferSize(jint sampleRateInHz, jint channelConfig, jint audioFormat);
-
+// TODO: add ctors and hide create()
     void play();
     void stop();
     void pause();

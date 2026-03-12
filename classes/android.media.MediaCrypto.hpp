@@ -5,7 +5,6 @@
  * https://github.com/wang-bin/JMI
  * MIT License
  */
-
 #pragma once
 #include "jmi/jmi.h"
 
