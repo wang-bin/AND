@@ -32,7 +32,6 @@ endif()
 
 file(GLOB CLASSES_SRC classes/*.cpp)
 file(GLOB NDK_SRC ndk/media/NdkMed*.cpp)
-file(GLOB AAUDIO_SRC ndk/aaudio/*.cpp)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/classes)
 
@@ -44,17 +43,21 @@ target_include_directories(android_classes INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
 add_library(mediandk OBJECT ${NDK_SRC})
 target_include_directories(mediandk INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/ndk)
 target_link_libraries(mediandk PUBLIC android_classes)
+
+# libmediandk.so: exists since api 21, try to link against it to use weak symbol and link agains, then dlsym is not needed for AImage*(api 24+)
 if(_android_api GREATER_EQUAL 21) # libmediandk exists since api 21
   target_link_libraries(mediandk PRIVATE -lmediandk)
-endif()
-if(_android_api LESS 24)
+else()
+# build < 21 target: no libmediandk.so, use dlsym
   target_sources(mediandk PRIVATE
       ndk/media/NdkImage.cpp
       ndk/media/NdkImageReader.cpp
   )
 endif()
 
+# libaaudio.so: api 26+. dlsym is always required when targeting api < 26
 if(_android_api LESS 26)
+  file(GLOB AAUDIO_SRC ndk/aaudio/*.cpp)
 # use OBJECT instead of STATIC to ensure weak symbols are resolved in final link
   add_library(aaudio OBJECT ${AAUDIO_SRC})
   target_link_libraries(aaudio PRIVATE dl)
