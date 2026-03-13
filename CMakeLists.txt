@@ -36,11 +36,14 @@ file(GLOB AAUDIO_SRC ndk/aaudio/*.cpp)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/classes)
 
-add_library(jmi STATIC jmi/jmi.cpp)
+add_subdirectory(jmi)
 add_library(android_classes STATIC ${CLASSES_SRC})
+target_link_libraries(android_classes PUBLIC jmi)
+target_include_directories(android_classes INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/classes)
 # use OBJECT instead of STATIC to ensure weak symbols are resolved in final link, e.g. AImageReader in api 26+
 add_library(mediandk OBJECT ${NDK_SRC})
-target_link_libraries(mediandk PUBLIC jmi android_classes)
+target_include_directories(mediandk INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/ndk)
+target_link_libraries(mediandk PUBLIC android_classes)
 if(_android_api GREATER_EQUAL 21) # libmediandk exists since api 21
   target_link_libraries(mediandk PRIVATE -lmediandk)
 endif()
