@@ -31,7 +31,7 @@ if(ANDROID)
 endif()
 
 file(GLOB CLASSES_SRC classes/*.cpp)
-file(GLOB NDK_SRC ndk/media/*.cpp)
+file(GLOB NDK_SRC ndk/media/NdkMed*.cpp)
 file(GLOB AAUDIO_SRC ndk/aaudio/*.cpp)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/classes)
@@ -47,8 +47,11 @@ target_link_libraries(mediandk PUBLIC android_classes)
 if(_android_api GREATER_EQUAL 21) # libmediandk exists since api 21
   target_link_libraries(mediandk PRIVATE -lmediandk)
 endif()
-if(_android_api LESS 26)
-# TODO: add AImageReader loader
+if(_android_api LESS 24)
+  target_sources(mediandk PRIVATE
+      ndk/media/NdkImage.cpp
+      ndk/media/NdkImageReader.cpp
+  )
 endif()
 
 if(_android_api LESS 26)

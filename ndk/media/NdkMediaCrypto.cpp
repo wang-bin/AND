@@ -1,18 +1,18 @@
 /*
  * AND: Android Native Dev in Modern C++ based on JMI
- * Copyright (C) 2018-2022 Wang Bin - wbsecg1@gmail.com
+ * Copyright (C) 2018-2026 Wang Bin - wbsecg1@gmail.com
  * https://github.com/wang-bin/AND
  * https://github.com/wang-bin/JMI
  * MIT License
  */
 
 #include "NdkMediaCrypto.hpp"
+#include "NdkMedia.h"
 #include "android.media.MediaCrypto.hpp"
 #include <dlfcn.h>
 #include <iostream>
 NDKMEDIA_NS_BEGIN
 using namespace jmi;
-extern void* mediandk_so();
 
 struct AMediaCrypto {
     AMediaCrypto* ndk_; // what ptr type does not matter, but AMediaCrypto* can simplify implementation

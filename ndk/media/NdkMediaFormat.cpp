@@ -1,26 +1,19 @@
 /*
  * AND: Android Native Dev in Modern C++ based on JMI
- * Copyright (C) 2018-2025 Wang Bin - wbsecg1@gmail.com
+ * Copyright (C) 2018-2026 Wang Bin - wbsecg1@gmail.com
  * https://github.com/wang-bin/AND
  * https://github.com/wang-bin/JMI
  * MIT License
  */
 
 #include "NdkMediaFormat.hpp"
+#include "NdkMedia.h"
 #include "android.media.MediaFormat.hpp"
 #include <dlfcn.h>
 #include <iostream>
 
 NDKMEDIA_NS_BEGIN
 using namespace jmi;
-
-static bool sEmulated = false;
-void* mediandk_so() {
-    if (sEmulated)
-        return nullptr;
-    static void* dso = dlopen("libmediandk.so", RTLD_LAZY|RTLD_LOCAL);
-    return dso;
-}
 
 struct AMediaFormat {
     AMediaFormat* ndk_; // what ptr type does not matter, but AMediaFormat* can simplify implementation
@@ -295,12 +288,3 @@ void AMediaFormat_setRect(AMediaFormat* obj, const char* name, int32_t left, int
         return fp(obj->ndk_, name, left, top, right, bottom);
 }
 NDKMEDIA_NS_END
-
-// NOTE: global, all codecs MUST be the same value, otherwise it's UB
-void mediandk_set_emulated(bool value) {
-    NDKMEDIA_NS::sEmulated = value;
-}
-
-bool mediandk_is_emulated() { // set by user, or runtime does not exist
-    return !NDKMEDIA_NS::mediandk_so();
-}

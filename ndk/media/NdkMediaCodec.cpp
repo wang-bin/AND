@@ -7,6 +7,7 @@
  */
 // TODO: jmi error/exception => media_status_t. libhybrid?
 #include "NdkMediaCodec.hpp"
+#include "NdkMedia.h"
 #include "android.media.MediaCodec.hpp"
 #include <android/native_window_jni.h>
 #include <dlfcn.h>
@@ -24,7 +25,6 @@ extern AMediaFormat* fromJmi(android::media::MediaFormat&& jfmt);
 extern android::media::MediaFormat toJmi(const AMediaFormat* fmt);
 extern AMediaCrypto* toNdk(const AMediaCrypto* obj);
 extern android::media::MediaCrypto toJmi(const AMediaCrypto* obj);
-extern void* mediandk_so();
 
 struct ANativeWindow_deleter {
     void operator()(ANativeWindow* w) const {
