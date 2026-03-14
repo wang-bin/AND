@@ -9,6 +9,10 @@
 #include "NdkMedia.h"
 #include <dlfcn.h>
 
+#if (__ANDROID_API__ + 0) >= 21
+#pragma comment(lib, "libmediandk.so")
+#endif
+
 NDKMEDIA_NS_BEGIN
 
 static bool sEmulated = false;

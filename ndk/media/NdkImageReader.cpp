@@ -6,6 +6,7 @@
  * MIT License
  */
 
+#if (__ANDROID_API__ + 0) < 21
 #include <media/NdkImageReader.h>
 #include <dlfcn.h>
 #include "NdkMedia.h"
@@ -38,3 +39,5 @@ NDKCOMPAT_DEFINE_RET(media_status_t, AImageReader_newWithDataSpace, AMEDIA_ERROR
 NDKCOMPAT_DEFINE_RET(media_status_t, AImageReader_acquireNextImageAsync, AMEDIA_ERROR_UNSUPPORTED, JMI_ARG3(AImageReader*, AImage**, int*))
 NDKCOMPAT_DEFINE_RET(media_status_t, AImageReader_acquireLatestImageAsync, AMEDIA_ERROR_UNSUPPORTED, JMI_ARG3(AImageReader*, AImage**, int*))
 NDKCOMPAT_DEFINE_RET(media_status_t, AImageReader_setBufferRemovedListener, AMEDIA_ERROR_UNSUPPORTED, JMI_ARG2(AImageReader*, AImageReader_BufferRemovedListener*))
+
+#endif // (__ANDROID_API__ + 0) < 21

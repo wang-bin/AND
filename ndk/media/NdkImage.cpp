@@ -5,7 +5,7 @@
  * https://github.com/wang-bin/JMI
  * MIT License
  */
-
+#if (__ANDROID_API__ + 0) < 21
 #include <media/NdkImage.h>
 #include <dlfcn.h>
 #include "NdkMedia.h"
@@ -35,3 +35,5 @@ NDKCOMPAT_DEFINE_RET(media_status_t, AImage_getPlaneData, AMEDIA_ERROR_UNSUPPORT
 NDKCOMPAT_DEFINE_VOID(AImage_deleteAsync, JMI_ARG2(AImage*, int))
 NDKCOMPAT_DEFINE_RET(media_status_t, AImage_getHardwareBuffer, AMEDIA_ERROR_UNSUPPORTED, JMI_ARG2(const AImage*, AHardwareBuffer**))
 NDKCOMPAT_DEFINE_RET(media_status_t, AImage_getDataSpace, AMEDIA_ERROR_UNSUPPORTED, JMI_ARG2(const AImage*, int32_t*))
+
+#endif // (__ANDROID_API__ + 0) < 21

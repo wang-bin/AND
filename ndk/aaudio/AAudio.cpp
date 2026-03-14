@@ -5,7 +5,9 @@
  * https://github.com/wang-bin/JMI
  * MIT License
  */
-
+#if (__ANDROID_API__ + 0) >= 26
+#pragma comment(lib, "libaaudio.so")
+#else
 #include <aaudio/AAudio.h>
 #include <dlfcn.h>
 #define NDKCOMPAT_API_DECL AAUDIO_API
@@ -110,4 +112,5 @@ NDKCOMPAT_DEFINE_RET(int32_t, AAudioStream_getOffloadDelay, AAUDIO_ERROR_UNIMPLE
 NDKCOMPAT_DEFINE_RET(int32_t, AAudioStream_getOffloadPadding, AAUDIO_ERROR_UNIMPLEMENTED, JMI_ARG1(AAudioStream*))
 NDKCOMPAT_DEFINE_RET(aaudio_result_t, AAudioStream_setOffloadEndOfStream, AAUDIO_ERROR_UNIMPLEMENTED, JMI_ARG1(AAudioStream*))
 #endif //__ANDROID_API_V__
-#undef NDKCOMPAT_API_DECL
+
+#endif // (__ANDROID_API__ + 0) >= 26
