@@ -105,12 +105,12 @@ NDKCOMPAT_DEFINE_RET(aaudio_allowed_capture_policy_t, AAudioStream_getAllowedCap
 NDKCOMPAT_DEFINE_RET(bool, AAudioStream_isPrivacySensitive, false, JMI_ARG1(AAudioStream*))
 NDKCOMPAT_DEFINE_RET(aaudio_channel_mask_t, AAudioStream_getChannelMask, static_cast<aaudio_channel_mask_t>(AAUDIO_UNSPECIFIED), JMI_ARG1(AAudioStream*))
 
-#if (__NDK_MAJOR__ + 0) >= 29 // defines api 36
+#if (__NDK_MAJOR__ + 0) >= 28 // defines api 36
 NDKCOMPAT_DEFINE_VOID(AAudioStreamBuilder_setPresentationEndCallback, JMI_ARG3(AAudioStreamBuilder*, AAudioStream_presentationEndCallback, void*)) // api 36+, requires ndk 29
 NDKCOMPAT_DEFINE_RET(aaudio_result_t, AAudioStream_setOffloadDelayPadding, AAUDIO_ERROR_UNIMPLEMENTED, JMI_ARG3(AAudioStream*, int32_t, int32_t))
 NDKCOMPAT_DEFINE_RET(int32_t, AAudioStream_getOffloadDelay, AAUDIO_ERROR_UNIMPLEMENTED, JMI_ARG1(AAudioStream*))
 NDKCOMPAT_DEFINE_RET(int32_t, AAudioStream_getOffloadPadding, AAUDIO_ERROR_UNIMPLEMENTED, JMI_ARG1(AAudioStream*))
 NDKCOMPAT_DEFINE_RET(aaudio_result_t, AAudioStream_setOffloadEndOfStream, AAUDIO_ERROR_UNIMPLEMENTED, JMI_ARG1(AAudioStream*))
-#endif //__ANDROID_API_V__
+#endif
 
 #endif // (__ANDROID_API__ + 0) >= 26
