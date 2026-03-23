@@ -53,7 +53,7 @@ AMediaCrypto* AMediaCrypto_new(const AMediaUUID uuid, const void *initData, size
         // TODO:
         //if (!obj.create())
          //   return nullptr;
-        return new AMediaCrypto{nullptr, std::move(obj)};
+        return fromJmi(std::move(obj));
     }
     static auto fp = (decltype(&AMediaCrypto_new))dlsym(so, __func__);
     return fromNdk(fp(uuid, initData, initDataSize));

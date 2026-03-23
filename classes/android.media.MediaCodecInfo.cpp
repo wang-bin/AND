@@ -1,6 +1,6 @@
 /*
  * AND: Android Native Dev in Modern C++ based on JMI
- * Copyright (C) 2018-2023 Wang Bin - wbsecg1@gmail.com
+ * Copyright (C) 2018-2026 Wang Bin - wbsecg1@gmail.com
  * https://github.com/wang-bin/AND
  * https://github.com/wang-bin/JMI
  * MIT License
@@ -60,6 +60,7 @@ JMI_DEFINE_CONST(jboolean, MediaCodecInfo::isEncoder, JMI_ARG0())
 
 JMI_DEFINE_CONST(jboolean,  MediaCodecInfo::AudioCapabilities::isSampleRateSupported, JMI_ARG1(jint))
 JMI_DEFINE_CONST(jint,  MediaCodecInfo::AudioCapabilities::getMaxInputChannelCount, JMI_ARG0())
+JMI_DEFINE_CONST(jint,  MediaCodecInfo::AudioCapabilities::getMinInputChannelCount, JMI_ARG0())
 JMI_DEFINE_CONST(std::vector<jint>,  MediaCodecInfo::AudioCapabilities::getSupportedSampleRates, JMI_ARG0())
 
 JMI_DEFINE_CONST(jboolean,  MediaCodecInfo::VideoCapabilities::areSizeAndRateSupported, JMI_ARG3(jint, jint, jdouble))

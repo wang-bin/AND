@@ -1,6 +1,6 @@
 /*
  * AND: Android Native Dev in Modern C++ based on JMI
- * Copyright (C) 2018-2023 Wang Bin - wbsecg1@gmail.com
+ * Copyright (C) 2018-2026 Wang Bin - wbsecg1@gmail.com
  * https://github.com/wang-bin/AND
  * https://github.com/wang-bin/JMI
  * MIT License
@@ -26,6 +26,7 @@ public:
         static constexpr auto name() { return JMISTR("android/media/MediaCodecInfo$AudioCapabilities");} // required if derive from JObject<>
         jboolean isSampleRateSupported(jint sampleRate) const;
         jint getMaxInputChannelCount() const;
+        jint getMinInputChannelCount() const; // api31
         std::vector<jint> getSupportedSampleRates() const;
     };
 
