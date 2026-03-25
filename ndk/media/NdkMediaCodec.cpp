@@ -22,9 +22,9 @@ using namespace std;
 extern AMediaFormat* fromNdk(AMediaFormat* obj);
 extern AMediaFormat* toNdk(const AMediaFormat* obj);
 extern AMediaFormat* fromJmi(android::media::MediaFormat&& jfmt);
-extern android::media::MediaFormat toJmi(const AMediaFormat* fmt);
+extern const android::media::MediaFormat& toJmi(const AMediaFormat* fmt);
 extern AMediaCrypto* toNdk(const AMediaCrypto* obj);
-extern android::media::MediaCrypto toJmi(const AMediaCrypto* obj);
+extern const android::media::MediaCrypto& toJmi(const AMediaCrypto* obj);
 
 struct ANativeWindow_deleter {
     void operator()(ANativeWindow* w) const {
@@ -51,11 +51,12 @@ AMediaCodec* fromJmi(android::media::MediaCodec&& obj)
     return new AMediaCodec{nullptr, std::move(obj)};
 }
 
-android::media::MediaCodec toJmi(const AMediaCodec* obj)
+const android::media::MediaCodec& toJmi(const AMediaCodec* obj)
 {
-    if (!obj)
-        return {};
-    return obj->jni_;
+    if (obj)
+        return obj->jni_;
+    static const android::media::MediaCodec dummy;
+    return dummy;
 }
 
 AMediaCodec* fromNdk(AMediaCodec* obj)

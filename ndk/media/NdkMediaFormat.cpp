@@ -27,11 +27,12 @@ AMediaFormat* fromJmi(android::media::MediaFormat&& obj)
     return new AMediaFormat{nullptr, std::move(obj)};
 }
 
-android::media::MediaFormat toJmi(const AMediaFormat* obj)
+const android::media::MediaFormat& toJmi(const AMediaFormat* obj)
 {
-    if (!obj)
-        return {};
-    return obj->jni_;
+    if (obj)
+        return obj->jni_;
+    static const android::media::MediaFormat dummy;
+    return dummy;
 }
 
 AMediaFormat* fromNdk(AMediaFormat* obj)

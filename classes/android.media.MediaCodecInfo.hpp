@@ -8,6 +8,7 @@
 #pragma once
 #include "jmi/jmi.h"
 #include "android.media.MediaFormat.hpp"
+#include "android.util.Range.hpp"
 #include <vector>
 
 namespace jmi {
@@ -26,8 +27,12 @@ public:
         static constexpr auto name() { return JMISTR("android/media/MediaCodecInfo$AudioCapabilities");} // required if derive from JObject<>
         jboolean isSampleRateSupported(jint sampleRate) const;
         jint getMaxInputChannelCount() const;
-        jint getMinInputChannelCount() const; // api31
         std::vector<jint> getSupportedSampleRates() const;
+        android::util::Range getBitrateRange() const;
+        std::vector<android::util::Range> getSupportedSampleRateRanges() const; // api21
+        // api31
+        std::vector<android::util::Range> getInputChannelCountRanges() const;
+        jint getMinInputChannelCount() const; // api31
     };
 
     struct VideoCapabilities final: public jmi::JObject<VideoCapabilities> { // api21
@@ -39,8 +44,14 @@ public:
         jboolean isSizeSupported(jint width, jint height) const;
         jint getHeightAlignment() const;
         jint getWidthAlignment() const;// POT
-        //Range<Integer> getSupportedFrameRates() const
-        // Range<Double> getSupportedFrameRatesFor(int width, int height)
+        android::util::Range getBitrateRange() const;
+        android::util::Range getSupportedFrameRates() const;
+        android::util::Range getSupportedFrameRatesFor(int width, int height) const;
+        android::util::Range getSupportedWidths() const;
+        android::util::Range getSupportedWidthsFor(int height) const;
+        android::util::Range getSupportedHeights() const;
+        android::util::Range getSupportedHeightsFor(int width) const;
+        android::util::Range getAchievableFrameRatesFor(jint width, jint height) const; // api23
     };
 
     struct EncoderCapabilities final: public jmi::JObject<EncoderCapabilities> { // api21
@@ -49,11 +60,13 @@ public:
             BITRATE_MODE_VBR = 1,
             BITRATE_MODE_CBR = 2,
         };
-        using Base = jmi::JObject<EncoderCapabilities>;
+        using Base = JObject<EncoderCapabilities>;
         using Base::Base; // inherits ctors
         using jmi::JObject<EncoderCapabilities>::create;
         static constexpr auto name() { return JMISTR("android/media/MediaCodecInfo$EncoderCapabilities");} // required if derive from JObject<>
         jboolean isBitrateModeSupported(jint mode) const;
+        android::util::Range getComplexityRange() const;
+        android::util::Range getQualityRange() const; // api28
     };
 
     struct CodecProfileLevel final: jmi::JObject<CodecProfileLevel> { //api16

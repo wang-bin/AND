@@ -24,11 +24,12 @@ AMediaCrypto* fromJmi(android::media::MediaCrypto&& jfmt)
     return new AMediaCrypto{nullptr, std::move(jfmt)};
 }
 
-android::media::MediaCrypto toJmi(const AMediaCrypto* obj)
+const android::media::MediaCrypto& toJmi(const AMediaCrypto* obj)
 {
-    if (!obj)
-        return {};
-    return obj->jni_;
+    if (obj)
+        return obj->jni_;
+    static const android::media::MediaCrypto dummy;
+    return dummy;
 }
 
 AMediaCrypto* fromNdk(AMediaCrypto* obj)
