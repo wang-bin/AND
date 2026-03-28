@@ -10,12 +10,16 @@
 
 ### CMake Targets
 
-The `ndk/` subdirectory provides two CMake targets, both declared as `OBJECT` libraries (not `STATIC`):
+The `ndk/` subdirectory provides two CMake targets whose names intentionally match the corresponding Android NDK shared libraries: `mediandk` (for `libmediandk.so`) and `aaudio` (for `libaaudio.so`). This naming means a consuming project can write `target_link_libraries(myapp mediandk)` and link against the compatibility OBJECT target rather than the raw system library. The system library (`-lmediandk`, etc.) is added as a `PRIVATE` dependency of the target so consumers don't need to mention it separately.
 
-- **`mediandk`**: Implements `libmediandk` APIs. When the target Android API level is ≥ 21, the build links against `libmediandk.so` (`-lmediandk`) and relies on weak symbols for any APIs not present in that API level. When targeting API < 21, the extra source files `NdkImage.cpp` and `NdkImageReader.cpp` are added, providing pure-dlsym stubs for those APIs.
-- **`aaudio`**: Implements `libaaudio` APIs. Only built when the target Android API level is < 26 (otherwise `libaaudio.so` is linked directly by the consuming project). Always links against `dl` for `dlsym`.
+Both targets are declared as `OBJECT` libraries (not `STATIC`):
 
-**Why `OBJECT` instead of `STATIC`?** Weak symbols must remain unresolved until the final link step so that the linker can resolve them against the real symbols from platform libraries (e.g. `AImageReader` APIs from `libmediandk.so` on API 26+). A `STATIC` library would cause these weak symbols to be "locked in" at archive creation time, preventing correct resolution. Using `OBJECT` libraries preserves the object files individually so the final link sees all symbols together.
+- **`mediandk`**: Implements `libmediandk` APIs. When the target Android API level is ≥ 21, the build links against `libmediandk.so` (`-lmediandk`) so that weak-symbol APIs introduced after API 21 resolve from the system library at link time. When targeting API < 21, the extra source files `NdkImage.cpp` and `NdkImageReader.cpp` are compiled in, providing pure-dlsym stubs for those APIs.
+- **`aaudio`**: Implements `libaaudio` APIs. Only built when the target Android API level is < 26 (when `libaaudio.so` is unavailable). Always links against `dl` for `dlsym`.
+
+**Why `OBJECT` instead of `STATIC`?** Weak symbols must remain unresolved until the final link step so that the linker can resolve them against the real symbols from the platform libraries (e.g. `AImageReader` APIs added to `libmediandk.so` on API 26+). When a `STATIC` archive is linked, the linker may bind a weak symbol to the weak definition found in the archive rather than searching further for a strong definition in another library. Using `OBJECT` libraries preserves each object file individually so the final link sees all symbols together and resolves weak definitions against strong ones correctly.
+
+**Build dependencies**: The `mediandk` target `PUBLIC`-links `android_classes` (which in turn `PUBLIC`-links `jmi`). Any target that links `mediandk` therefore automatically gets both `android_classes` and `jmi` without having to name them explicitly. The system library (`-lmediandk`, `dl`) is always `PRIVATE` to avoid leaking that dependency to consumers.
 
 ### Android API Level Macro Guards
 
@@ -43,11 +47,9 @@ NDK version guards use the same idiom:
 
 ### When to Use Weak Symbol Only
 
-Use a plain `__attribute__((weak))` declaration (without a dlsym fallback) when:
+There are two ways to get weak symbols in this codebase:
 
-- The shared library is already linked (`-lmediandk`, `-laaudio`, etc.), so the symbol *will* be resolved by the linker from that library if the API level supports it.
-- You need a graceful no-op or null result on older devices where the symbol does not exist in the linked library, rather than a hard linker error.
-- The same object file may be linked into multiple modules; `weak` prevents duplicate-symbol errors in that case.
+**1. Explicit `__attribute__((weak))`**: Use this when you need to declare a symbol from a linked library that may or may not be present on the running device, and you do not want to use `dlsym`. This also prevents duplicate-symbol linker errors when the same object appears in multiple modules.
 
 Example from `ndk/media/NdkMediaCodec.cpp`:
 
@@ -56,46 +58,86 @@ Example from `ndk/media/NdkMediaCodec.cpp`:
 extern "C" jobject ANativeWindow_toSurface(JNIEnv* env, ANativeWindow* window) __attribute__((weak));
 ```
 
-At runtime, check whether the pointer is non-null before calling it, or use `__builtin_available` when NDK ≥ 23 and `__ANDROID_UNAVAILABLE_SYMBOLS_ARE_WEAK__` is defined.
-
-### When to Use dlsym
-
-Use `dlsym` for runtime resolution when:
-
-- The shared library (`libmediandk.so`, `libaaudio.so`, `libandroid.so`) is **not** linked at build time (e.g. targeting API < 21 for mediandk, or API < 26 for aaudio).
-- The API may or may not exist on the running device and you need a graceful fallback (JNI path or returning an error code).
-- You want to avoid hard link-time dependencies on optional platform libraries.
-
-The general dlsym pattern used throughout this codebase:
+Check the pointer at runtime before calling:
 
 ```c
-// Lazy-load the shared library once
-void* mediandk_so() {
-    static void* dso = dlopen("libmediandk.so", RTLD_LAZY | RTLD_LOCAL);
-    return dso;
-}
-
-// Resolve and call the symbol; fall back to JNI if unavailable
-AMediaCodec* AMediaCodec_createCodecByName(const char* name) {
-    auto so = mediandk_so();
-    if (so) {
-        static const auto fp = (decltype(&AMediaCodec_createCodecByName))dlsym(so, __func__);
-        return fromNdk(fp(name));  // fromNdk: wraps the NDK AMediaCodec* in the local AMediaCodec struct
-    }
-    // JNI fallback
-    auto obj = android::media::MediaCodec::createByCodecName(name);
-    ...
+if (ANativeWindow_toSurface) {
+    s.reset(ANativeWindow_toSurface(env, anw), env);
 }
 ```
 
-Key points:
+**2. Availability attributes from NDK headers**: When using NDK 23+ and the compiler defines `__ANDROID_UNAVAILABLE_SYMBOLS_ARE_WEAK__`, API functions in the NDK headers that are annotated with availability macros are marked as weak symbols by the compiler — no manual `__attribute__((weak))` is needed. Use `__builtin_available()` to guard the call at runtime:
+
+```c
+#if defined(__ANDROID_UNAVAILABLE_SYMBOLS_ARE_WEAK__) && (__NDK_MAJOR__ + 0) >= 23
+    if (__builtin_available(android 26, *)) {
+        s.reset(ANativeWindow_toSurface(env, anw), env);
+    }
+#else
+    // fall back to manual dlsym
+#endif
+```
+
+### When to Use dlsym
+
+The approach depends on whether the API has a Java/JMI equivalent:
+
+**Case 1 — API has a JMI fallback (corresponding Java class exists)**
+
+Add the NDK types and API declarations to the project's own namespace (`NDKMEDIA_NS`). The internal struct wraps both the native NDK pointer (`ndk_`) and a JMI object (`jni_`). At runtime, prefer the function pointer obtained via `dlsym`; if resolution fails, fall back to the JMI implementation:
+
+```c
+// Inside NDKMEDIA_NS
+struct AMediaCodecInfo {
+    const AMediaCodecInfo* ndk_ = nullptr;               // native NDK pointer (if available)
+    jmi::android::media::MediaCodecInfo jni_;            // JMI fallback
+    ...
+};
+
+const char* AMediaCodecInfo_getCanonicalName(const AMediaCodecInfo* info) {
+    static const auto fp = (decltype(&AMediaCodecInfo_getCanonicalName))
+        (mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
+    if (fp)
+        return fp(toNdk(info));  // NDK path: toNdk unwraps to the native pointer
+    // JMI fallback (const_cast is safe: canonical_name_ is a lazily-cached mutable field):
+    auto obj = const_cast<AMediaCodecInfo*>(info);
+    obj->canonical_name_ = obj->jni_.getCanonicalName();
+    return strOrNull(obj->canonical_name_);
+}
+```
+
+**Case 2 — API has no JMI fallback (no corresponding Java class)**
+
+Implement the C API in the global namespace (or in a file-level anonymous namespace for helpers), guarded by the Android API level macro so the file is only compiled when the system library is not available. `NDKCOMPAT_DEFINE_RET` / `NDKCOMPAT_DEFINE_VOID` from `NdkCompatAPI.h` generate these stubs concisely; they return an error code (or do nothing) if `dlsym` resolution fails:
+
+```c
+// ndk/media/NdkImageReader.cpp — only compiled for API < 21
+#if (__ANDROID_API__ + 0) < 21
+#include <media/NdkImageReader.h>
+#include "NdkCompatAPI.h"
+
+namespace {
+void* resolve(const char* name) {
+    if (auto so = NDKMEDIA_NS::mediandk_so()) return dlsym(so, name);
+    return nullptr;
+}
+}
+
+NDKCOMPAT_DEFINE_RET(media_status_t, AImageReader_new, AMEDIA_ERROR_UNSUPPORTED,
+    JMI_ARG5(int32_t, int32_t, int32_t, int32_t, AImageReader**))
+// ... more stubs
+#endif
+```
+
+The general dlsym pattern for Case 1:
+
 - `dlopen` is called only once per library (static local variable).
 - `__func__` is used as the symbol name to avoid typos and reduce maintenance.
 - `decltype(&FunctionName)` provides a type-safe cast of the `void*` returned by `dlsym`.
 
 ### NdkCompatAPI.h — Generating dlsym Wrappers
 
-`ndk/NdkCompatAPI.h` provides two macros that generate complete dlsym-based wrapper functions:
+`ndk/NdkCompatAPI.h` provides two macros that generate complete dlsym-based wrapper functions (used for Case 2 above — no JMI fallback):
 
 ```c
 // For functions with a return value
