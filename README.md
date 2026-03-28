@@ -78,6 +78,59 @@ if (ANativeWindow_toSurface) {
 #endif
 ```
 
+### fromNdk() / toNdk() — Pointer Wrapping
+
+Because the project re-declares API types such as `AMediaCodec` and `AMediaCodecInfo` inside `NDKMEDIA_NS`, these wrapper structs and the identically-named opaque types in the system `libmediandk.so` are **different, incompatible types**. The system library functions expect the system's own opaque pointers; the project's functions expose the project's wrapper pointers to callers.
+
+`fromNdk()` and `toNdk()` bridge this gap:
+
+- **`fromNdk(SystemType* p)`** — allocates a new project wrapper struct on the heap, stores the system pointer in `ndk_`, and returns a pointer to the wrapper. Used whenever the system library returns a new object that must be handed to the caller as the project's type.
+- **`toNdk(const WrapperType* p)`** — extracts the stored `ndk_` system pointer from the wrapper and returns it. Used to unwrap before passing an object to a system library function that expects its own opaque type.
+
+Example from `NdkMediaCodec.cpp`:
+
+```c
+// The project's own wrapper struct (NDKMEDIA_NS)
+struct AMediaCodec {
+    AMediaCodec* ndk_;   // pointer to the REAL system AMediaCodec opaque struct
+    android::media::MediaCodec jni_;  // JMI fallback
+    ...
+};
+
+AMediaCodec* fromNdk(AMediaCodec* obj) {
+    if (!obj) return nullptr;
+    return new AMediaCodec{obj};  // wrap system pointer
+}
+
+AMediaCodec* toNdk(const AMediaCodec* obj) {
+    if (!obj) return nullptr;
+    return obj->ndk_;              // unwrap to system pointer
+}
+
+// Usage in an API function:
+AMediaCodec* AMediaCodec_createCodecByName(const char* name) {
+    auto so = mediandk_so();
+    if (so) {
+        static const auto fp = (decltype(&AMediaCodec_createCodecByName))dlsym(so, __func__);
+        return fromNdk(fp(name));  // system returns system ptr → wrap it
+    }
+    // JMI fallback ...
+}
+
+media_status_t AMediaCodec_delete(AMediaCodec* obj) {
+    auto so = mediandk_so();
+    if (so) {
+        static const auto fp = (decltype(&AMediaCodec_delete))dlsym(so, __func__);
+        auto ret = fp(obj->ndk_);  // pass system ptr directly, then delete the wrapper
+        delete obj;
+        return ret;
+    }
+    // JMI fallback ...
+}
+```
+
+The same `fromNdk`/`toNdk` pair is defined for every wrapped type (`AMediaFormat`, `AMediaCrypto`, `AMediaCodecInfo`, `ACodecAudioCapabilities`, etc.) so the same pattern applies everywhere.
+
 ### When to Use dlsym
 
 The approach depends on whether the API has a Java/JMI equivalent:
