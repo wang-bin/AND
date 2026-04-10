@@ -31,7 +31,7 @@ if(ANDROID)
 endif()
 
 file(GLOB CLASSES_SRC classes/*.cpp)
-file(GLOB NDK_SRC ndk/media/NdkMed*.cpp)
+file(GLOB NDK_MEDIA_SRC ndk/media/NdkMed*.cpp)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/classes)
 
@@ -39,8 +39,10 @@ add_subdirectory(jmi)
 add_library(android_classes STATIC ${CLASSES_SRC})
 target_link_libraries(android_classes PUBLIC jmi)
 target_include_directories(android_classes INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/classes)
+
+add_compile_definitions(__ANDROID_UNAVAILABLE_SYMBOLS_ARE_WEAK__)
 # use OBJECT instead of STATIC to ensure weak symbols are resolved in final link, e.g. AImageReader in api 26+
-add_library(mediandk OBJECT ${NDK_SRC})
+add_library(mediandk OBJECT ${NDK_MEDIA_SRC})
 target_include_directories(mediandk INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/ndk)
 target_link_libraries(mediandk PUBLIC android_classes)
 
@@ -53,6 +55,17 @@ else()
       ndk/media/NdkImage.cpp
       ndk/media/NdkImageReader.cpp
   )
+endif()
+
+# libandroid.so: ASurfaceTexture api 28+. Use compat wrappers when targeting api < 28
+if(_android_api LESS 28)
+# use OBJECT instead of STATIC to ensure weak symbols are resolved in final link
+  add_library(android OBJECT
+      ndk/android/surface_texture.cpp
+      ndk/android/surface_texture_jni.cpp
+  )
+  target_link_libraries(android PUBLIC android_classes)
+  target_link_libraries(android PRIVATE -landroid)
 endif()
 
 # libaaudio.so: api 26+. dlsym is always required when targeting api < 26
