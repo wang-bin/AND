@@ -8,7 +8,7 @@
 
 #include "surface_texture_p.hpp"
 #include "surface_texture.hpp"
-#include "../../classes/android.graphics.SurfaceTexture.hpp"
+#include "android.graphics.SurfaceTexture.hpp"
 #include "jmi/jmi.h"
 
 #include <android/native_window_jni.h>
@@ -30,14 +30,14 @@ using Surface = jmi::JObject<SurfaceTag>;
 
 ASurfaceTexture* fromJmi(jmi::android::graphics::SurfaceTexture&& obj)
 {
-	return new ASurfaceTexture{nullptr, new jmi::android::graphics::SurfaceTexture(std::move(obj))};
+	return new ASurfaceTexture{nullptr, std::move(obj)};
 }
 
 ASurfaceTexture* fromNdk(::ASurfaceTexture* obj)
 {
 	if (!obj)
 		return nullptr;
-	return new ASurfaceTexture{obj, nullptr};
+	return new ASurfaceTexture{obj, {}};
 }
 
 ::ASurfaceTexture* toNdk(const ASurfaceTexture* obj)
@@ -55,7 +55,6 @@ void ASurfaceTexture_release(ASurfaceTexture* st)
 		if (__builtin_available(android 28, *))
 			::ASurfaceTexture_release(toNdk(st));
 	}
-	delete st->jni_;
 	delete st;
 }
 

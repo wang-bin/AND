@@ -8,7 +8,7 @@
 
 #include "surface_texture_p.hpp"
 #include "surface_texture_jni.hpp"
-#include "../../classes/android.graphics.SurfaceTexture.hpp"
+#include "android.graphics.SurfaceTexture.hpp"
 
 #pragma comment(lib, "libandroid.so")
 

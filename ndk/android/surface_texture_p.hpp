@@ -9,22 +9,15 @@
 #pragma once
 
 #include "surface_texture_jni.hpp"
+#include "android.graphics.SurfaceTexture.hpp"
 #include <android/surface_texture_jni.h>
-
-namespace jmi {
-namespace android {
-namespace graphics {
-class SurfaceTexture;
-} // namespace graphics
-} // namespace android
-} // namespace jmi
 
 namespace ndk {
 namespace android {
 
 struct ASurfaceTexture {
     ::ASurfaceTexture* ndk_{};
-    jmi::android::graphics::SurfaceTexture* jni_{};
+    jmi::android::graphics::SurfaceTexture jni_{};
 };
 
 ASurfaceTexture* fromJmi(jmi::android::graphics::SurfaceTexture&& obj);
