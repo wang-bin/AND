@@ -1,6 +1,7 @@
 /*
  * AND: Android Native Dev in Modern C++ based on JMI
  * Copyright (C) 2018-2026 Wang Bin - wbsecg1@gmail.com
+ * AI assisted
  * https://github.com/wang-bin/AND
  * https://github.com/wang-bin/JMI
  * MIT License
@@ -21,6 +22,18 @@
 #define JMI_DEFINE(R, name, ...) JMI_EXPAND(JMI_DEFINE_T_V_(R, name, __VA_ARGS__)) /* not ##__VA_ARGS__ !*/
 #define JMI_DEFINE_CONST(R, name, ...) JMI_EXPAND(JMI_DEFINE_T_V_CONST_(R, name, __VA_ARGS__)) /* not ##__VA_ARGS__ !*/
 #define JMI_DEFINE_STATIC(R, name, ...) JMI_EXPAND(JMI_DEFINE_STATIC_T_V_(R, name, __VA_ARGS__)) /* not ##__VA_ARGS__ !*/
+#define JMI_DEFINE_FIELD(R, NAME) \
+    R NAME() { \
+        constexpr const char* kName = __func__; \
+        struct F : public jmi::FieldTag { static const char* name() { return kName; }}; \
+        return field<F, R>(); \
+    }
+#define JMI_DEFINE_FIELD_CONST(R, NAME) \
+    R NAME() const { \
+        constexpr const char* kName = __func__; \
+        struct F : public jmi::FieldTag { static const char* name() { return kName; }}; \
+        return field<F, R>(); \
+    }
 
 // how to get current function result type easily?
 #define JMI_DEFINE_T_V_(R, NAME, ARG_T, ARG_T_V, ARG_V) \

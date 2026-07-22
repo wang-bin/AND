@@ -1,6 +1,7 @@
 /*
  * AND: Android Native Dev in Modern C++ based on JMI
- * Copyright (C) 2018-2019 Wang Bin - wbsecg1@gmail.com
+ * Copyright (C) 2018-2026 Wang Bin - wbsecg1@gmail.com
+ * AI assisted
  * https://github.com/wang-bin/AND
  * https://github.com/wang-bin/JMI
  * MIT License
@@ -20,6 +21,10 @@ JMI_DEFINE(void, AudioTrack::pause, JMI_ARG0())
 JMI_DEFINE(void, AudioTrack::flush, JMI_ARG0())
 JMI_DEFINE(void, AudioTrack::release, JMI_ARG0())
 JMI_DEFINE_CONST(jint, AudioTrack::getState, JMI_ARG0())
+JMI_DEFINE_CONST(jint, AudioTrack::getPlayState, JMI_ARG0())
+JMI_DEFINE_CONST(jint, AudioTrack::getPlaybackHeadPosition, JMI_ARG0())
+JMI_DEFINE_CONST(jint, AudioTrack::getLatency, JMI_ARG0())
+JMI_DEFINE_CONST(jboolean, AudioTrack::getTimestamp, JMI_ARG1(AudioTimestamp&))
 JMI_DEFINE(jint, AudioTrack::write, JMI_ARG3(jbyteArray, jint, jint))
 JMI_DEFINE(jint, AudioTrack::write, JMI_ARG3(jshortArray, jint, jint))
 JMI_DEFINE(jint, AudioTrack::write, JMI_ARG4(jfloatArray, jint, jint, jint))

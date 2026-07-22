@@ -1,6 +1,7 @@
 /*
  * AND: Android Native Dev in Modern C++ based on JMI
- * Copyright (C) 2018-2021 Wang Bin - wbsecg1@gmail.com
+ * Copyright (C) 2018-2026 Wang Bin - wbsecg1@gmail.com
+ * AI assisted
  * https://github.com/wang-bin/AND
  * https://github.com/wang-bin/JMI
  * MIT License
@@ -8,6 +9,7 @@
 
 #pragma once
 #include "jmi/jmi.h"
+#include "android.media.AudioTimestamp.hpp"
 
 namespace jmi {
 namespace android {
@@ -60,6 +62,7 @@ enum {
 
 class AudioTrack : public jmi::JObject<AudioTrack>
 {
+    // TODO: builder
 public:
     enum {
         MODE_STATIC = 0,
@@ -70,6 +73,12 @@ public:
         STATE_UNINITIALIZED = 0x0,
         STATE_INITIALIZED = 0x1,
         STATE_NO_STATIC_DATA = 0x2,
+    };
+
+    enum {
+        PLAYSTATE_STOPPED = 1,
+        PLAYSTATE_PAUSED = 2,
+        PLAYSTATE_PLAYING = 3,
     };
 
     enum {
@@ -89,6 +98,10 @@ public:
     void flush();
     void release();
     jint getState() const;
+    jint getPlayState() const;
+    jint getPlaybackHeadPosition() const;
+    jint getLatency() const; // deprecated api29+, still used when getTimestamp unavailable
+    jboolean getTimestamp(AudioTimestamp& timestamp) const; // api19+
     jint write(const jbyteArray data, jint offsetInBytes, jint sizeInBytes);
     jint write(const jshortArray data, jint offsetInShorts, jint sizeInShorts);
     // writeMode since api 21
