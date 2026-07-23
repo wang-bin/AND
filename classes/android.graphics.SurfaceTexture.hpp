@@ -1,6 +1,7 @@
 /*
  * AND: Android Native Dev in Modern C++ based on JMI
- * Copyright (C) 2018-2021 Wang Bin - wbsecg1@gmail.com
+ * Copyright (C) 2018-2026 Wang Bin - wbsecg1@gmail.com
+ * AI participated
  * https://github.com/wang-bin/AND
  * https://github.com/wang-bin/JMI
  * MIT License
@@ -8,6 +9,7 @@
 
 #pragma once
 #include "jmi/jmi.h"
+#include <android/api-level.h>
 
 namespace jmi {
 namespace android {
@@ -32,7 +34,7 @@ public:
     void detachFromGLContext();
     jlong getTimestamp() const;
     void getTransformMatrix(std::reference_wrapper<jfloat[16]> mtx) const;
-    jboolean isReleased() const;
+    jboolean isReleased() const __INTRODUCED_IN(26);
     void release();
     void releaseTexImage();
     void setDefaultBufferSize(jint width, jint height);

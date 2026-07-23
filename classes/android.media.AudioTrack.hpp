@@ -1,7 +1,7 @@
 /*
  * AND: Android Native Dev in Modern C++ based on JMI
  * Copyright (C) 2018-2026 Wang Bin - wbsecg1@gmail.com
- * AI assisted
+ * AI participated
  * https://github.com/wang-bin/AND
  * https://github.com/wang-bin/JMI
  * MIT License
@@ -100,14 +100,15 @@ public:
     jint getState() const;
     jint getPlayState() const;
     jint getPlaybackHeadPosition() const;
+    // getLatency: not public! unit: ms. including mixer, buffer and hardware latency
     jint getLatency() const; // deprecated api29+, still used when getTimestamp unavailable
     jboolean getTimestamp(AudioTimestamp& timestamp) const; // api19+
     jint write(const jbyteArray data, jint offsetInBytes, jint sizeInBytes);
     jint write(const jshortArray data, jint offsetInShorts, jint sizeInShorts);
-    // writeMode since api 21
     jint write(const jfloatArray data, jint offsetInFloats, jint sizeInFloats, jint writeMode);
-    jint setVolume(jfloat gain); // api 21
+    jint setVolume(jfloat gain);
     jint setStereoVolume(jfloat leftGain, jfloat rightGain);
+
 };
 } // namespace media
 } // namespace android

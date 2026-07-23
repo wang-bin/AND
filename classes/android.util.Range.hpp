@@ -1,4 +1,11 @@
-
+/*
+ * AND: Android Native Dev in Modern C++ based on JMI
+ * Copyright (C) 2018-2026 Wang Bin - wbsecg1@gmail.com
+ * AI participated
+ * https://github.com/wang-bin/AND
+ * https://github.com/wang-bin/JMI
+ * MIT License
+ */
 #pragma once
 /*
 public final class Range<T extends Comparable<? super T>> {
@@ -26,7 +33,7 @@ namespace jmi {
 namespace android {
 namespace util {
 
-class Range final: public jmi::JObject<Range> {
+class Range final : public jmi::JObject<Range> {
 public:
     using Base = jmi::JObject<Range>;
     using Base::Base;

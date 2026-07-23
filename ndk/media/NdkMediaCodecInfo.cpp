@@ -1,6 +1,7 @@
 /*
  * AND: Android Native Dev in Modern C++ based on JMI
  * Copyright (C) 2026 Wang Bin - wbsecg1@gmail.com
+ * AI participated
  * https://github.com/wang-bin/AND
  * https://github.com/wang-bin/JMI
  * MIT License
@@ -108,13 +109,15 @@ void refreshAudioCaches(ACodecAudioCapabilities* audio)
 			audio->sample_rate_ranges_.emplace_back(r.getLower<jint>(), r.getUpper<jint>());
 	}
 	audio->channel_count_ranges_.clear();
-	const auto channel_count_ranges = audio->jni_.getInputChannelCountRanges();
-	if (!audio->jni_.error().empty() || channel_count_ranges.empty()) {
-		clog << audio->jni_.error() << endl;
-	} else {
-		audio->channel_count_ranges_.reserve(channel_count_ranges.size());
-		for (const auto& r : channel_count_ranges)
-			audio->channel_count_ranges_.emplace_back(r.getLower<jint>(), r.getUpper<jint>());
+	if (__builtin_available(android 31, *)) {
+		const auto channel_count_ranges = audio->jni_.getInputChannelCountRanges();
+		if (!audio->jni_.error().empty() || channel_count_ranges.empty()) {
+			clog << audio->jni_.error() << endl;
+		} else {
+			audio->channel_count_ranges_.reserve(channel_count_ranges.size());
+			for (const auto& r : channel_count_ranges)
+				audio->channel_count_ranges_.emplace_back(r.getLower<jint>(), r.getUpper<jint>());
+		}
 	}
 }
 
@@ -133,7 +136,10 @@ const char* _Nullable AMediaCodecInfo_getCanonicalName(const AMediaCodecInfo* _N
 	if (!info)
 		return nullptr;
 	auto obj = const_cast<AMediaCodecInfo*>(info);
-	obj->canonical_name_ = obj->jni_.getCanonicalName();
+	if (__builtin_available(android 29, *))
+		obj->canonical_name_ = obj->jni_.getCanonicalName();
+	else
+		obj->canonical_name_ = obj->jni_.getName();
 	if (!obj->jni_.error().empty()) {
 		obj->canonical_name_.clear();
 		clog << __func__ << " ERROR: " << obj->jni_.error() << endl;
@@ -161,10 +167,13 @@ int32_t AMediaCodecInfo_isVendor(const AMediaCodecInfo* _Nonnull info)
 		return fp(toNdk(info));
 	if (!info)
 		return -1;
-	const auto ret = info->jni_.isVendor();
-	if (!info->jni_.error().empty())
-		return -1;
-	return ret;
+	if (__builtin_available(android 29, *)) {
+		const auto ret = info->jni_.isVendor();
+		if (!info->jni_.error().empty())
+			return -1;
+		return ret;
+	}
+	return -1;
 }
 
 AMediaCodecType AMediaCodecInfo_getMediaCodecInfoType(const AMediaCodecInfo* _Nonnull info)
@@ -174,15 +183,18 @@ AMediaCodecType AMediaCodecInfo_getMediaCodecInfoType(const AMediaCodecInfo* _No
 		return fp(toNdk(info));
 	if (!info)
 		return AMediaCodecType_INVALID_CODEC_INFO;
-	const auto software_only = info->jni_.isSoftwareOnly();
-	if (!info->jni_.error().empty())
-		return AMediaCodecType_INVALID_CODEC_INFO;
-	if (software_only)
-		return AMediaCodecType_SOFTWARE_ONLY;
-	const auto hw = info->jni_.isHardwareAccelerated();
-	if (!info->jni_.error().empty())
-		return AMediaCodecType_INVALID_CODEC_INFO;
-	return hw ? AMediaCodecType_HARDWARE_ACCELERATED : AMediaCodecType_SOFTWARE_WITH_DEVICE_ACCESS;
+	if (__builtin_available(android 29, *)) {
+		const auto software_only = info->jni_.isSoftwareOnly();
+		if (!info->jni_.error().empty())
+			return AMediaCodecType_INVALID_CODEC_INFO;
+		if (software_only)
+			return AMediaCodecType_SOFTWARE_ONLY;
+		const auto hw = info->jni_.isHardwareAccelerated();
+		if (!info->jni_.error().empty())
+			return AMediaCodecType_INVALID_CODEC_INFO;
+		return hw ? AMediaCodecType_HARDWARE_ACCELERATED : AMediaCodecType_SOFTWARE_WITH_DEVICE_ACCESS;
+	}
+	return AMediaCodecType_INVALID_CODEC_INFO;
 }
 
 const char* _Nullable AMediaCodecInfo_getMediaType(const AMediaCodecInfo* _Nonnull info)
@@ -210,10 +222,13 @@ int32_t AMediaCodecInfo_getMaxSupportedInstances(const AMediaCodecInfo* _Nonnull
 	decltype(auto) caps = getCodecCaps(info);
 	if (!caps)
 		return -1;
-	const auto ret = caps.getMaxSupportedInstances();
-	if (!caps.error().empty())
-		return -1;
-	return ret;
+	if (__builtin_available(android 23, *)) {
+		const auto ret = caps.getMaxSupportedInstances();
+		if (!caps.error().empty())
+			return -1;
+		return ret;
+	}
+	return -1;
 }
 
 int32_t AMediaCodecInfo_isFeatureSupported(const AMediaCodecInfo* _Nonnull info, const char* _Nonnull featureName)
@@ -412,10 +427,13 @@ int32_t ACodecAudioCapabilities_getMinInputChannelCount(const ACodecAudioCapabil
 		return fp(toNdk(audioCaps));
 	if (!audioCaps)
 		return -1;
-    const auto ret = audioCaps->jni_.getMinInputChannelCount();
-    if (!audioCaps->jni_.error().empty())
-        return -1;
-	return ret;
+	if (__builtin_available(android 31, *)) {
+		const auto ret = audioCaps->jni_.getMinInputChannelCount();
+		if (!audioCaps->jni_.error().empty())
+			return -1;
+		return ret;
+	}
+	return -1;
 }
 
 media_status_t ACodecAudioCapabilities_getInputChannelCountRanges(const ACodecAudioCapabilities* _Nonnull audioCaps, const AIntRange* _Nullable * _Nonnull outArrayPtr, size_t* _Nonnull outCount)
@@ -597,14 +615,17 @@ media_status_t ACodecVideoCapabilities_getAchievableFrameRatesFor(const ACodecVi
 		return fp(toNdk(videoCaps), width, height, outRange);
 	if (!videoCaps || !outRange || !videoCaps->jni_)
 		return AMEDIA_ERROR_INVALID_PARAMETER;
-	const auto range = videoCaps->jni_.getAchievableFrameRatesFor(width, height);
-	if (!videoCaps->jni_.error().empty() || !range) {
-		clog << videoCaps->jni_.error() << endl;
-		return AMEDIA_ERROR_UNSUPPORTED;
+	if (__builtin_available(android 23, *)) {
+		const auto range = videoCaps->jni_.getAchievableFrameRatesFor(width, height);
+		if (!videoCaps->jni_.error().empty() || !range) {
+			clog << videoCaps->jni_.error() << endl;
+			return AMEDIA_ERROR_UNSUPPORTED;
+		}
+		outRange->mLower = range.getLower<jdouble>();
+		outRange->mUpper = range.getUpper<jdouble>();
+		return AMEDIA_OK;
 	}
-	outRange->mLower = range.getLower<jdouble>();
-	outRange->mUpper = range.getUpper<jdouble>();
-	return AMEDIA_OK;
+	return AMEDIA_ERROR_UNSUPPORTED;
 }
 
 int32_t ACodecVideoCapabilities_areSizeAndRateSupported(const ACodecVideoCapabilities* _Nonnull videoCaps, int32_t width, int32_t height, double frameRate)
@@ -640,14 +661,17 @@ media_status_t ACodecEncoderCapabilities_getQualityRange(const ACodecEncoderCapa
 		return fp(toNdk(encoderCaps), outRange);
 	if (!encoderCaps || !outRange || !encoderCaps->jni_)
 		return AMEDIA_ERROR_INVALID_PARAMETER;
-	const auto range = encoderCaps->jni_.getQualityRange();
-	if (!encoderCaps->jni_.error().empty() || !range) {
-		clog << encoderCaps->jni_.error() << endl;
-		return AMEDIA_ERROR_UNSUPPORTED;
+	if (__builtin_available(android 28, *)) {
+		const auto range = encoderCaps->jni_.getQualityRange();
+		if (!encoderCaps->jni_.error().empty() || !range) {
+			clog << encoderCaps->jni_.error() << endl;
+			return AMEDIA_ERROR_UNSUPPORTED;
+		}
+		outRange->mLower = range.getLower<jint>();
+		outRange->mUpper = range.getUpper<jint>();
+		return AMEDIA_OK;
 	}
-	outRange->mLower = range.getLower<jint>();
-	outRange->mUpper = range.getUpper<jint>();
-	return AMEDIA_OK;
+	return AMEDIA_ERROR_UNSUPPORTED;
 }
 
 media_status_t ACodecEncoderCapabilities_getComplexityRange(const ACodecEncoderCapabilities* _Nonnull encoderCaps, AIntRange* _Nonnull outRange)

@@ -1,6 +1,7 @@
 /*
  * AND: Android Native Dev in Modern C++ based on JMI
  * Copyright (C) 2018-2026 Wang Bin - wbsecg1@gmail.com
+ * AI participated
  * https://github.com/wang-bin/AND
  * https://github.com/wang-bin/JMI
  * MIT License
@@ -52,7 +53,11 @@ struct Store {
 			const bool is_enc = jni.isEncoder();
 			if (!jni.error().empty())
 				continue;
-			const auto name = jni.getCanonicalName();
+			string name;
+			if (__builtin_available(android 29, *))
+				name = jni.getCanonicalName();
+			else
+				name = jni.getName();
 			if (!jni.error().empty())
 				continue;
 			if (const auto types = jni.getSupportedTypes(); !types.empty()) {

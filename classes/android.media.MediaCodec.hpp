@@ -1,6 +1,7 @@
 /*
  * AND: Android Native Dev in Modern C++ based on JMI
- * Copyright (C) 2018-2021 Wang Bin - wbsecg1@gmail.com
+ * Copyright (C) 2018-2026 Wang Bin - wbsecg1@gmail.com
+ * AI participated
  * https://github.com/wang-bin/AND
  * https://github.com/wang-bin/JMI
  * MIT License
@@ -61,7 +62,7 @@ public:
     std::string getName() const; // api 18
     void signalEndOfInputStream(); //api18
     MediaFormat getOutputFormat() const; // never returns null
-    MediaFormat getInputFormat() const; // api 21. call after configure() to get accepted format
+    MediaFormat getInputFormat() const; // call after configure() to get accepted format
     void queueInputBuffer(jint index, jint offset, jint size, jlong presentationTimeUs, jint flags);
     //void queueSecureInputBuffer(jint index, jint offset, const CJNIMediaCodecCryptoInfo &info, jlong presentationTimeUs, jint flags);
     // return: index or -1
@@ -71,12 +72,12 @@ public:
     jint dequeueOutputBuffer(BufferInfo& info, jlong timeoutUs);
     jint dequeueOutputBuffer(std::reference_wrapper<BufferInfo> info, jlong timeoutUs);
     void releaseOutputBuffer(jint index, jboolean render);
-    void releaseOutputBuffer(jint index, jlong renderTimestampNs); // api 21
-    MediaFormat getOutputFormat(jint index) const; //api 21. call after configure() to get accepted format
+    void releaseOutputBuffer(jint index, jlong renderTimestampNs);
+    MediaFormat getOutputFormat(jint index) const; // call after configure() to get accepted format
     std::vector<java::nio::ByteBuffer> getInputBuffers() const; // Deprecated as of API 21
     std::vector<java::nio::ByteBuffer> getOutputBuffers() const; // Deprecated as of API 21
-    java::nio::ByteBuffer getInputBuffer(jint index) const; // API 21+
-    java::nio::ByteBuffer getOutputBuffer(jint index) const; // API 21+
+    java::nio::ByteBuffer getInputBuffer(jint index) const;
+    java::nio::ByteBuffer getOutputBuffer(jint index) const;
     void setVideoScalingMode(jint mode);
     //void setParameters(Bundle params); // api21
     //void setInputSurface(Surface surface); //api23

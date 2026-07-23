@@ -1,6 +1,7 @@
 /*
  * AND: Android Native Dev in Modern C++ based on JMI
  * Copyright (C) 2018-2026 Wang Bin - wbsecg1@gmail.com
+ * AI participated
  * https://github.com/wang-bin/AND
  * https://github.com/wang-bin/JMI
  * MIT License
@@ -9,6 +10,7 @@
 #include "jmi/jmi.h"
 #include "android.media.MediaFormat.hpp"
 #include "android.util.Range.hpp"
+#include <android/api-level.h>
 #include <vector>
 
 namespace jmi {
@@ -20,7 +22,7 @@ public:
     using Base::Base; // inherits ctors
     static constexpr auto name() { return JMISTR("android/media/MediaCodecInfo");} // required if derive from JObject<>
 
-    struct AudioCapabilities final: public jmi::JObject<AudioCapabilities> { // api21
+    struct AudioCapabilities final : public jmi::JObject<AudioCapabilities> {
         using Base = jmi::JObject<AudioCapabilities>;
         using Base::Base; // inherits ctors
         using jmi::JObject<AudioCapabilities>::create;
@@ -29,13 +31,12 @@ public:
         jint getMaxInputChannelCount() const;
         std::vector<jint> getSupportedSampleRates() const;
         android::util::Range getBitrateRange() const;
-        std::vector<android::util::Range> getSupportedSampleRateRanges() const; // api21
-        // api31
-        std::vector<android::util::Range> getInputChannelCountRanges() const;
-        jint getMinInputChannelCount() const; // api31
+        std::vector<android::util::Range> getSupportedSampleRateRanges() const;
+        std::vector<android::util::Range> getInputChannelCountRanges() const __INTRODUCED_IN(31);
+        jint getMinInputChannelCount() const __INTRODUCED_IN(31);
     };
 
-    struct VideoCapabilities final: public jmi::JObject<VideoCapabilities> { // api21
+    struct VideoCapabilities final : public jmi::JObject<VideoCapabilities> {
         using Base = jmi::JObject<VideoCapabilities>;
         using Base::Base; // inherits ctors
         using jmi::JObject<VideoCapabilities>::create;
@@ -43,7 +44,7 @@ public:
         jboolean areSizeAndRateSupported(jint width, jint height, jdouble frameRate) const;
         jboolean isSizeSupported(jint width, jint height) const;
         jint getHeightAlignment() const;
-        jint getWidthAlignment() const;// POT
+        jint getWidthAlignment() const; // POT
         android::util::Range getBitrateRange() const;
         android::util::Range getSupportedFrameRates() const;
         android::util::Range getSupportedFrameRatesFor(int width, int height) const;
@@ -51,10 +52,10 @@ public:
         android::util::Range getSupportedWidthsFor(int height) const;
         android::util::Range getSupportedHeights() const;
         android::util::Range getSupportedHeightsFor(int width) const;
-        android::util::Range getAchievableFrameRatesFor(jint width, jint height) const; // api23
+        android::util::Range getAchievableFrameRatesFor(jint width, jint height) const __INTRODUCED_IN(23);
     };
 
-    struct EncoderCapabilities final: public jmi::JObject<EncoderCapabilities> { // api21
+    struct EncoderCapabilities final : public jmi::JObject<EncoderCapabilities> {
         enum Value {
             BITRATE_MODE_CQ = 0,
             BITRATE_MODE_VBR = 1,
@@ -66,10 +67,10 @@ public:
         static constexpr auto name() { return JMISTR("android/media/MediaCodecInfo$EncoderCapabilities");} // required if derive from JObject<>
         jboolean isBitrateModeSupported(jint mode) const;
         android::util::Range getComplexityRange() const;
-        android::util::Range getQualityRange() const; // api28
+        android::util::Range getQualityRange() const __INTRODUCED_IN(28);
     };
 
-    struct CodecProfileLevel final: jmi::JObject<CodecProfileLevel> { //api16
+    struct CodecProfileLevel final : jmi::JObject<CodecProfileLevel> {
         using Base = jmi::JObject<CodecProfileLevel>;
         using Base::Base; // inherits ctors
         using jmi::JObject<CodecProfileLevel>::create;
@@ -261,25 +262,24 @@ public:
     };
 
     // nested classes
-    class CodecCapabilities final: public jmi::JObject<CodecCapabilities> { // api16
+    class CodecCapabilities final : public jmi::JObject<CodecCapabilities> {
     public:
         using Base = jmi::JObject<CodecCapabilities>;
         using Base::Base; // inherits ctors
         using jmi::JObject<CodecCapabilities>::create;
         static constexpr auto name() { return JMISTR("android/media/MediaCodecInfo$CodecCapabilities");} // required if derive from JObject<>
-        static CodecCapabilities createFromProfileLevel(const char* mime, jint profile, jint level); //api21
+        static CodecCapabilities createFromProfileLevel(const char* mime, jint profile, jint level);
 
-        // api21: getXXXCapabilities()
         AudioCapabilities getAudioCapabilities() const;
         EncoderCapabilities getEncoderCapabilities() const;
         VideoCapabilities getVideoCapabilities() const;
 
-        MediaFormat getDefaultFormat() const; // api21
-        jint getMaxSupportedInstances() const; // api23. not all devices returns a correct value, e.g. Samsung p600
+        MediaFormat getDefaultFormat() const;
+        jint getMaxSupportedInstances() const __INTRODUCED_IN(23); // not all devices returns a correct value, e.g. Samsung p600
         std::string getMimeType() const;
-        jboolean isFeatureRequired(const char* name) const; // api21
+        jboolean isFeatureRequired(const char* name) const;
         jboolean isFeatureSupported(const char* name) const; // api19
-        jboolean isFormatSupported(const MediaFormat& format) const; //api21
+        jboolean isFormatSupported(const MediaFormat& format) const;
     // public fields
     //Defined in the OpenMAX IL specs, color format values are drawn from OMX_COLOR_FORMATTYPE
         std::vector<jint> colorFormats() const; // assume read only.  return field<std::vector<jint>>("colorFormats").get();
@@ -290,12 +290,11 @@ public:
     std::string getName() const;
     std::vector<std::string> getSupportedTypes() const;
     jboolean isEncoder() const;
-    // api level 29 begin
-    std::string getCanonicalName() const; // This method returns the name of the underlying codec name, which must not be another alias. For non-aliases this is always the name of the codec
-    jboolean isAlias() const; // Query if the codec is an alias for another underlying codec.
-    jboolean isHardwareAccelerated() const;
-    jboolean isSoftwareOnly() const;
-    jboolean isVendor() const; // Query if the codec is provided by the Android platform (false) or the device manufacturer (true).
+    std::string getCanonicalName() const __INTRODUCED_IN(29); // This method returns the name of the underlying codec name, which must not be another alias. For non-aliases this is always the name of the codec
+    jboolean isAlias() const __INTRODUCED_IN(29); // Query if the codec is an alias for another underlying codec.
+    jboolean isHardwareAccelerated() const __INTRODUCED_IN(29);
+    jboolean isSoftwareOnly() const __INTRODUCED_IN(29);
+    jboolean isVendor() const __INTRODUCED_IN(29); // Query if the codec is provided by the Android platform (false) or the device manufacturer (true).
 protected:
     // create
 };
