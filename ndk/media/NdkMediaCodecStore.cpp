@@ -170,8 +170,10 @@ media_status_t AMediaCodecStore_findNextDecoderForFormat(
 	const AMediaFormat* _Nullable format,
 	const AMediaCodecInfo* _Nullable * _Nonnull outCodecInfo)
 {
+	// symbol is available since api 36, but may have bug. https://github.com/wang-bin/mdk-sdk/issues/365
+	// TODO: os.api set by user
 	static const auto fp = (decltype(&AMediaCodecStore_findNextDecoderForFormat))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
-	if (fp) {
+	if (fp && android_get_device_api_level() > 36) {
 		const AMediaCodecInfo* ndk_out = *outCodecInfo ? toNdk(*outCodecInfo) : nullptr;
 		const auto ret = fp(toNdk(format), &ndk_out);
 		*outCodecInfo = fromNdkCached(ndk_out);
@@ -187,7 +189,7 @@ media_status_t AMediaCodecStore_findNextEncoderForFormat(
 	const AMediaCodecInfo* _Nullable * _Nonnull outCodecInfo)
 {
 	static const auto fp = (decltype(&AMediaCodecStore_findNextEncoderForFormat))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
-	if (fp) {
+	if (fp && android_get_device_api_level() > 36) {
 		const AMediaCodecInfo* ndk_out = *outCodecInfo ? toNdk(*outCodecInfo) : nullptr;
 		const auto ret = fp(toNdk(format), &ndk_out);
 		*outCodecInfo = fromNdkCached(ndk_out);
