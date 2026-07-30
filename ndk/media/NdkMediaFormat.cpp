@@ -1,6 +1,7 @@
 /*
  * AND: Android Native Dev in Modern C++ based on JMI
  * Copyright (C) 2018-2026 Wang Bin - wbsecg1@gmail.com
+ * AI participated
  * https://github.com/wang-bin/AND
  * https://github.com/wang-bin/JMI
  * MIT License
@@ -39,7 +40,7 @@ AMediaFormat* fromNdk(AMediaFormat* obj)
 {
     if (!obj)
         return nullptr;
-    return new AMediaFormat{obj};;
+    return new AMediaFormat{obj};
 }
 
 AMediaFormat* toNdk(const AMediaFormat* obj)
@@ -50,26 +51,31 @@ AMediaFormat* toNdk(const AMediaFormat* obj)
 }
 
 AMediaFormat *AMediaFormat_new() {
-    if (!mediandk_so()) {
-        android::media::MediaFormat obj;
-        if (!obj.create())
-            return nullptr;
-        return fromJmi(std::move(obj));
+    // Both backends when possible: e.g. AMediaCodecInfo_isFormatSupported may take either path.
+    AMediaFormat* ndk = nullptr;
+    if (mediandk_so()) {
+        static const auto fp = (decltype(&AMediaFormat_new))dlsym(mediandk_so(), __func__);
+        if (fp)
+            ndk = fp();
     }
-    static const auto fp = (decltype(&AMediaFormat_new))dlsym(mediandk_so(), __func__);
-    return fromNdk(fp());
+    android::media::MediaFormat jni;
+    if (!jni.create()) {
+        if (!ndk)
+            return nullptr;
+        return new AMediaFormat{.ndk_ = ndk};
+    }
+    return new AMediaFormat{.ndk_ = ndk, .jni_ = std::move(jni)};
 }
 
 media_status_t AMediaFormat_delete(AMediaFormat* obj) {
     if (!obj) // required if used as smart ptr deleter
         return AMEDIA_OK;
-    void* so = mediandk_so();
-    if (!so) {
-        delete obj;
-        return AMEDIA_OK;
+    media_status_t ret = AMEDIA_OK;
+    if (auto ndk = toNdk(obj)) {
+        static const auto fp = (decltype(&AMediaFormat_delete))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
+        if (fp)
+            ret = fp(ndk);
     }
-    static const auto fp = (decltype(&AMediaFormat_delete))dlsym(so, __func__);
-    const auto ret = fp(obj->ndk_);
     delete obj;
     return ret;
 }
@@ -177,23 +183,27 @@ bool AMediaFormat_getString(AMediaFormat* obj, const char *name, const char **ou
 
 void AMediaFormat_setInt32(AMediaFormat* obj, const char* name, int32_t value)
 {
-    void* so = mediandk_so();
-    if (so) {
-        static const auto fp = (decltype(&AMediaFormat_setInt32))dlsym(so, __func__);
-        return fp(obj->ndk_, name, value);
+    if (auto ndk = toNdk(obj)) {
+        static const auto fp = (decltype(&AMediaFormat_setInt32))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
+        if (fp)
+            fp(ndk, name, value);
     }
-    obj->jni_.setInteger(name, value);
-    if (!obj->jni_.error().empty())
-        clog << __func__ << " ERROR: " + obj->jni_.error() << endl;
+    if (obj->jni_) {
+        obj->jni_.setInteger(name, value);
+        if (!obj->jni_.error().empty())
+            clog << __func__ << " ERROR: " + obj->jni_.error() << endl;
+    }
 }
 
 void AMediaFormat_setInt64(AMediaFormat* obj, const char* name, int64_t value)
 {
-    void* so = mediandk_so();
-    if (so) {
-        static const auto fp = (decltype(&AMediaFormat_setInt64))dlsym(so, __func__);
-        return fp(obj->ndk_, name, value);
+    if (auto ndk = toNdk(obj)) {
+        static const auto fp = (decltype(&AMediaFormat_setInt64))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
+        if (fp)
+            fp(ndk, name, value);
     }
+    if (!obj->jni_)
+        return;
     obj->jni_.setLong(name, value);
     if (!obj->jni_.error().empty())
         clog << __func__ << " ERROR: " + obj->jni_.error() << endl;
@@ -201,11 +211,13 @@ void AMediaFormat_setInt64(AMediaFormat* obj, const char* name, int64_t value)
 
 void AMediaFormat_setFloat(AMediaFormat* obj, const char* name, float value)
 {
-    void* so = mediandk_so();
-    if (so) {
-        static const auto fp = (decltype(&AMediaFormat_setFloat))dlsym(so, __func__);
-        return fp(obj->ndk_, name, value);
+    if (auto ndk = toNdk(obj)) {
+        static const auto fp = (decltype(&AMediaFormat_setFloat))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
+        if (fp)
+            fp(ndk, name, value);
     }
+    if (!obj->jni_)
+        return;
     obj->jni_.setFloat(name, value);
     if (!obj->jni_.error().empty())
         clog << __func__ << " ERROR: " + obj->jni_.error() << endl;
@@ -213,11 +225,13 @@ void AMediaFormat_setFloat(AMediaFormat* obj, const char* name, float value)
 
 void AMediaFormat_setString(AMediaFormat* obj, const char* name, const char* value)
 {
-    void* so = mediandk_so();
-    if (so) {
-        static const auto fp = (decltype(&AMediaFormat_setString))dlsym(so, __func__);
-        return fp(obj->ndk_, name, value);
+    if (auto ndk = toNdk(obj)) {
+        static const auto fp = (decltype(&AMediaFormat_setString))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
+        if (fp)
+            fp(ndk, name, value);
     }
+    if (!obj->jni_)
+        return;
     obj->jni_.setString(name, value);
     if (!obj->jni_.error().empty())
         clog << __func__ << " ERROR: " + obj->jni_.error() << endl;
@@ -225,12 +239,13 @@ void AMediaFormat_setString(AMediaFormat* obj, const char* name, const char* val
 
 void AMediaFormat_setBuffer(AMediaFormat* obj, const char* name, void* data, size_t size)
 {
-    void* so = mediandk_so();
-    if (so) {
-        static const auto fp = (decltype(&AMediaFormat_setBuffer))dlsym(so, __func__);
-        fp(obj->ndk_, name, data, size);
-        return;
+    if (auto ndk = toNdk(obj)) {
+        static const auto fp = (decltype(&AMediaFormat_setBuffer))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
+        if (fp)
+            fp(ndk, name, data, size);
     }
+    if (!obj->jni_)
+        return;
     LocalRef dbb = getEnv()->NewDirectByteBuffer(data, (jlong)size);
     obj->jni_.setByteBuffer(name, java::nio::ByteBuffer(std::move(dbb)));
     if (!obj->jni_.error().empty())
@@ -261,31 +276,31 @@ bool AMediaFormat_getRect(AMediaFormat* obj, const char *name, int32_t *left, in
 
 void AMediaFormat_setDouble(AMediaFormat* obj, const char* name, double value)
 {
-    void* so = mediandk_so();
-    if (!so)
-        return;
-    static const auto fp = (decltype(&AMediaFormat_setDouble))dlsym(so, __func__);
-    if (fp)
-        fp(obj->ndk_, name, value);
+    // no jmi equivalent
+    if (auto ndk = toNdk(obj)) {
+        static const auto fp = (decltype(&AMediaFormat_setDouble))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
+        if (fp)
+            fp(ndk, name, value);
+    }
 }
 
 void AMediaFormat_setSize(AMediaFormat* obj, const char* name, size_t value)
 {
-    void* so = mediandk_so();
-    if (!so)
-        return;
-    static const auto fp = (decltype(&AMediaFormat_setSize))dlsym(so, __func__);
-    if (fp)
-        return fp(obj->ndk_, name, value);
+    // no jmi equivalent
+    if (auto ndk = toNdk(obj)) {
+        static const auto fp = (decltype(&AMediaFormat_setSize))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
+        if (fp)
+            fp(ndk, name, value);
+    }
 }
 
 void AMediaFormat_setRect(AMediaFormat* obj, const char* name, int32_t left, int32_t top, int32_t right, int32_t bottom)
 {
-    void* so = mediandk_so();
-    if (!so)
-        return;
-    static const auto fp = (decltype(&AMediaFormat_setRect))dlsym(so, __func__);
-    if (fp)
-        return fp(obj->ndk_, name, left, top, right, bottom);
+    // no jmi equivalent
+    if (auto ndk = toNdk(obj)) {
+        static const auto fp = (decltype(&AMediaFormat_setRect))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
+        if (fp)
+            fp(ndk, name, left, top, right, bottom);
+    }
 }
 NDKMEDIA_NS_END

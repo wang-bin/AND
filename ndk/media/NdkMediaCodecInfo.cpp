@@ -263,7 +263,6 @@ int32_t AMediaCodecInfo_isFeatureRequired(const AMediaCodecInfo* _Nonnull info, 
 	return ret;
 }
 
-// FIXME: info can be jni but format can be ndk. TODO: AMediaFormat_new() create both jni and ndk?
 int32_t AMediaCodecInfo_isFormatSupported(const AMediaCodecInfo* _Nonnull info, const AMediaFormat* _Nonnull format)
 {
 	static const auto fp = (decltype(&AMediaCodecInfo_isFormatSupported))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
