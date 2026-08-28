@@ -22,6 +22,28 @@
 #define JMI_DEFINE(R, name, ...) JMI_EXPAND(JMI_DEFINE_T_V_(R, name, __VA_ARGS__)) /* not ##__VA_ARGS__ !*/
 #define JMI_DEFINE_CONST(R, name, ...) JMI_EXPAND(JMI_DEFINE_T_V_CONST_(R, name, __VA_ARGS__)) /* not ##__VA_ARGS__ !*/
 #define JMI_DEFINE_STATIC(R, name, ...) JMI_EXPAND(JMI_DEFINE_STATIC_T_V_(R, name, __VA_ARGS__)) /* not ##__VA_ARGS__ !*/
+
+#if (JMI_CXX20 + 0)
+#define JMI_DEFINE_FIELD(R, NAME) \
+    R NAME() { return field<R, __func__>(); }
+#define JMI_DEFINE_FIELD_CONST(R, NAME) \
+    R NAME() const { return field<R, __func__>(); }
+
+#define JMI_DEFINE_T_V_(R, NAME, ARG_T, ARG_T_V, ARG_V) \
+    R NAME ARG_T_V { \
+        return call<R, __func__> ARG_V; \
+    }
+
+#define JMI_DEFINE_T_V_CONST_(R, NAME, ARG_T, ARG_T_V, ARG_V) \
+    R NAME ARG_T_V const { \
+        return call<R, __func__> ARG_V; \
+    }
+
+#define JMI_DEFINE_STATIC_T_V_(R, NAME, ARG_T, ARG_T_V, ARG_V) \
+    R NAME ARG_T_V { \
+        return callStatic<R, __func__> ARG_V; \
+    }
+#else
 #define JMI_DEFINE_FIELD(R, NAME) \
     R NAME() { \
         constexpr const char* kName = __func__; \
@@ -56,3 +78,4 @@
         struct MT : MethodTag { static const char* name() {return kName;}}; \
         return callStatic<R, MT> ARG_V; \
     }
+#endif
