@@ -1,6 +1,7 @@
 /*
  * AND: Android Native Dev in Modern C++ based on JMI
  * Copyright (C) 2018-2026 Wang Bin - wbsecg1@gmail.com
+ * AI participated
  * https://github.com/wang-bin/AND
  * https://github.com/wang-bin/JMI
  * MIT License
@@ -489,21 +490,23 @@ media_status_t AMediaCodec_setAsyncNotifyCallback(AMediaCodec* obj, AMediaCodecO
     obj->async_cb_userdata_ = userdata;
     AMediaCodecOnAsyncNotifyCallback cb;
     // codec, format etc. in callback parameter from ndk are ndk objects, we must convert them to our c++ objects
-    cb.onAsyncInputAvailable = [](AMediaCodec *codec, void *userdata, int32_t index) {
+    // The native codec always corresponds to obj, so reuse its wrapper instead of allocating one per callback.
+    // The format callback transfers a newly allocated NDK format, so that object still needs wrapping.
+    cb.onAsyncInputAvailable = [](AMediaCodec*, void *userdata, int32_t index) {
         auto obj = static_cast<AMediaCodec*>(userdata);
-        obj->async_cb_.onAsyncInputAvailable(fromNdk(codec), obj->async_cb_userdata_, index);
+        obj->async_cb_.onAsyncInputAvailable(obj, obj->async_cb_userdata_, index);
     };
-    cb.onAsyncOutputAvailable = [](AMediaCodec *codec, void *userdata, int32_t index, AMediaCodecBufferInfo *bufferInfo) {
+    cb.onAsyncOutputAvailable = [](AMediaCodec*, void *userdata, int32_t index, AMediaCodecBufferInfo *bufferInfo) {
         auto obj = static_cast<AMediaCodec*>(userdata);
-        obj->async_cb_.onAsyncOutputAvailable(fromNdk(codec), obj->async_cb_userdata_, index, bufferInfo);
+        obj->async_cb_.onAsyncOutputAvailable(obj, obj->async_cb_userdata_, index, bufferInfo);
     };
-    cb.onAsyncFormatChanged = [](AMediaCodec *codec, void *userdata, AMediaFormat *format) {
+    cb.onAsyncFormatChanged = [](AMediaCodec*, void *userdata, AMediaFormat *format) {
         auto obj = static_cast<AMediaCodec*>(userdata);
-        obj->async_cb_.onAsyncFormatChanged(fromNdk(codec), obj->async_cb_userdata_, fromNdk(format));
+        obj->async_cb_.onAsyncFormatChanged(obj, obj->async_cb_userdata_, fromNdk(format));
     };
-    cb.onAsyncError = [](AMediaCodec *codec, void *userdata, media_status_t error, int32_t actionCode, const char *detail) {
+    cb.onAsyncError = [](AMediaCodec*, void *userdata, media_status_t error, int32_t actionCode, const char *detail) {
         auto obj = static_cast<AMediaCodec*>(userdata);
-        obj->async_cb_.onAsyncError(fromNdk(codec), obj->async_cb_userdata_, error, actionCode, detail);
+        obj->async_cb_.onAsyncError(obj, obj->async_cb_userdata_, error, actionCode, detail);
     };
     return fp(obj->ndk_, cb, obj);
 }
