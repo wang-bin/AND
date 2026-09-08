@@ -209,7 +209,6 @@ media_status_t AMediaCodec_stop(AMediaCodec* obj)
         return fp(obj->ndk_);
     }
     obj->jni_.stop();
-    return AMEDIA_OK;
     if (obj->jni_.error().empty())
         return AMEDIA_OK;
     clog << __PRETTY_FUNCTION__ << " ERROR: " + obj->jni_.error() << endl;
