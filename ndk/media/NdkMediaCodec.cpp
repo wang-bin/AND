@@ -15,6 +15,7 @@
 #include <sys/system_properties.h>
 #include <iostream>
 #include <memory>
+#include <mutex>
 #include <vector>
 NDKMEDIA_NS_BEGIN
 using namespace jmi;
@@ -42,6 +43,8 @@ struct AMediaCodec {
     std::string name_;
     std::vector<java::nio::ByteBuffer> inbufs_; // jni only
     std::vector<java::nio::ByteBuffer> outbufs_; // jni only
+    // Callback state can be cleared while a native notification is queued.
+    std::mutex async_cb_mtx_;
     AMediaCodecOnAsyncNotifyCallback async_cb_{};
     void* async_cb_userdata_ = nullptr;
     ANativeWindowPtr anw_;
@@ -480,35 +483,66 @@ void AMediaCodec_releaseName(AMediaCodec* obj, char* name)
 
 media_status_t AMediaCodec_setAsyncNotifyCallback(AMediaCodec* obj, AMediaCodecOnAsyncNotifyCallback callback, void *userdata)
 { // ndk 28
+    if (!obj)
+        return AMEDIA_ERROR_INVALID_PARAMETER;
     auto so = mediandk_so();
     if (!so)
         return AMEDIA_ERROR_UNSUPPORTED;
     static const auto fp = (decltype(&AMediaCodec_setAsyncNotifyCallback))dlsym(so, __func__);
     if (!fp)
         return AMEDIA_ERROR_UNSUPPORTED;
-    obj->async_cb_ = callback;
-    obj->async_cb_userdata_ = userdata;
-    AMediaCodecOnAsyncNotifyCallback cb;
+    const bool has_callback = callback.onAsyncInputAvailable
+        || callback.onAsyncOutputAvailable
+        || callback.onAsyncFormatChanged
+        || callback.onAsyncError;
+    {
+        const lock_guard lock(obj->async_cb_mtx_);
+        obj->async_cb_ = callback;
+        obj->async_cb_userdata_ = has_callback ? userdata : nullptr;
+    }
+    AMediaCodecOnAsyncNotifyCallback cb{};
     // codec, format etc. in callback parameter from ndk are ndk objects, we must convert them to our c++ objects
     // The native codec always corresponds to obj, so reuse its wrapper instead of allocating one per callback.
     // The format callback transfers a newly allocated NDK format, so that object still needs wrapping.
-    cb.onAsyncInputAvailable = [](AMediaCodec*, void *userdata, int32_t index) {
+    cb.onAsyncInputAvailable = callback.onAsyncInputAvailable ? [](AMediaCodec*, void *userdata, int32_t index) {
         auto obj = static_cast<AMediaCodec*>(userdata);
-        obj->async_cb_.onAsyncInputAvailable(obj, obj->async_cb_userdata_, index);
-    };
-    cb.onAsyncOutputAvailable = [](AMediaCodec*, void *userdata, int32_t index, AMediaCodecBufferInfo *bufferInfo) {
+        if (!obj)
+            return;
+        const lock_guard lock(obj->async_cb_mtx_);
+        if (obj->async_cb_.onAsyncInputAvailable)
+            obj->async_cb_.onAsyncInputAvailable(obj, obj->async_cb_userdata_, index);
+    } : nullptr;
+    cb.onAsyncOutputAvailable = callback.onAsyncOutputAvailable ? [](AMediaCodec*, void *userdata, int32_t index, AMediaCodecBufferInfo *bufferInfo) {
         auto obj = static_cast<AMediaCodec*>(userdata);
-        obj->async_cb_.onAsyncOutputAvailable(obj, obj->async_cb_userdata_, index, bufferInfo);
-    };
-    cb.onAsyncFormatChanged = [](AMediaCodec*, void *userdata, AMediaFormat *format) {
+        if (!obj)
+            return;
+        const lock_guard lock(obj->async_cb_mtx_);
+        if (obj->async_cb_.onAsyncOutputAvailable)
+            obj->async_cb_.onAsyncOutputAvailable(obj, obj->async_cb_userdata_, index, bufferInfo);
+    } : nullptr;
+    cb.onAsyncFormatChanged = callback.onAsyncFormatChanged ? [](AMediaCodec*, void *userdata, AMediaFormat *format) {
         auto obj = static_cast<AMediaCodec*>(userdata);
-        obj->async_cb_.onAsyncFormatChanged(obj, obj->async_cb_userdata_, fromNdk(format));
-    };
-    cb.onAsyncError = [](AMediaCodec*, void *userdata, media_status_t error, int32_t actionCode, const char *detail) {
+        if (!obj) {
+            AMediaFormat_delete(fromNdk(format));
+            return;
+        }
+        const lock_guard lock(obj->async_cb_mtx_);
+        auto wrapped_format = fromNdk(format);
+        if (obj->async_cb_.onAsyncFormatChanged) {
+            obj->async_cb_.onAsyncFormatChanged(obj, obj->async_cb_userdata_, wrapped_format);
+        } else {
+            AMediaFormat_delete(wrapped_format);
+        }
+    } : nullptr;
+    cb.onAsyncError = callback.onAsyncError ? [](AMediaCodec*, void *userdata, media_status_t error, int32_t actionCode, const char *detail) {
         auto obj = static_cast<AMediaCodec*>(userdata);
-        obj->async_cb_.onAsyncError(obj, obj->async_cb_userdata_, error, actionCode, detail);
-    };
-    return fp(obj->ndk_, cb, obj);
+        if (!obj)
+            return;
+        const lock_guard lock(obj->async_cb_mtx_);
+        if (obj->async_cb_.onAsyncError)
+            obj->async_cb_.onAsyncError(obj, obj->async_cb_userdata_, error, actionCode, detail);
+    } : nullptr;
+    return fp(obj->ndk_, cb, has_callback ? obj : nullptr);
 }
 
 //media_status_t AMediaCodec_releaseCrypto(AMediaCodec*);
