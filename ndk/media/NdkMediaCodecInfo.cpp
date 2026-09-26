@@ -63,6 +63,16 @@ AMediaCodecInfo* toNdk(const AMediaCodecInfo* obj)
 
 namespace {
 
+// JObject methods also mutate their error state. Serialize both initialization
+// and queries, including queries through pointers returned by the codec API.
+template<class T>
+std::unique_lock<std::recursive_mutex> lockObject(const T* obj)
+{
+	if (!obj)
+		return {};
+	return std::unique_lock<std::recursive_mutex>(*obj->mutex_);
+}
+
 const char* strOrNull(string& storage)
 {
 	return storage.empty() ? nullptr : storage.c_str();
@@ -71,6 +81,7 @@ const char* strOrNull(string& storage)
 static
 const android::media::MediaCodecInfo::CodecCapabilities& getCodecCaps(const AMediaCodecInfo* info)
 {
+	const auto lock = lockObject(info);
 	static const android::media::MediaCodecInfo::CodecCapabilities dummy;
 	if (!info)
 		return dummy;
@@ -130,12 +141,15 @@ const char* AMediaCodecInfo_FEATURE_DynamicTimestamp = "dynamic-timestamp";
 
 const char* _Nullable AMediaCodecInfo_getCanonicalName(const AMediaCodecInfo* _Nonnull info)
 {
+	const auto lock = lockObject(info);
 	static const auto fp = (decltype(&AMediaCodecInfo_getCanonicalName))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
 	if (auto ndk = toNdk(info); ndk && fp)
 		return fp(ndk);
 	if (!info)
 		return nullptr;
 	auto obj = const_cast<AMediaCodecInfo*>(info);
+	if (!obj->canonical_name_.empty())
+		return obj->canonical_name_.c_str();
 	if (__builtin_available(android 29, *))
 		obj->canonical_name_ = obj->jni_.getCanonicalName();
 	else
@@ -149,6 +163,7 @@ const char* _Nullable AMediaCodecInfo_getCanonicalName(const AMediaCodecInfo* _N
 
 AMediaCodecKind AMediaCodecInfo_getKind(const AMediaCodecInfo* _Nonnull info)
 {
+	const auto lock = lockObject(info);
 	static const auto fp = (decltype(&AMediaCodecInfo_getKind))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
 	if (auto ndk = toNdk(info); ndk && fp)
 		return fp(ndk);
@@ -162,6 +177,7 @@ AMediaCodecKind AMediaCodecInfo_getKind(const AMediaCodecInfo* _Nonnull info)
 
 int32_t AMediaCodecInfo_isVendor(const AMediaCodecInfo* _Nonnull info)
 {
+	const auto lock = lockObject(info);
 	static const auto fp = (decltype(&AMediaCodecInfo_isVendor))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
 	if (auto ndk = toNdk(info); ndk && fp)
 		return fp(ndk);
@@ -178,6 +194,7 @@ int32_t AMediaCodecInfo_isVendor(const AMediaCodecInfo* _Nonnull info)
 
 AMediaCodecType AMediaCodecInfo_getMediaCodecInfoType(const AMediaCodecInfo* _Nonnull info)
 {
+	const auto lock = lockObject(info);
 	static const auto fp = (decltype(&AMediaCodecInfo_getMediaCodecInfoType))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
 	if (auto ndk = toNdk(info); ndk && fp)
 		return fp(ndk);
@@ -199,6 +216,7 @@ AMediaCodecType AMediaCodecInfo_getMediaCodecInfoType(const AMediaCodecInfo* _No
 
 const char* _Nullable AMediaCodecInfo_getMediaType(const AMediaCodecInfo* _Nonnull info)
 {
+	const auto lock = lockObject(info);
 	static const auto fp = (decltype(&AMediaCodecInfo_getMediaType))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
 	if (auto ndk = toNdk(info); ndk && fp)
 		return fp(ndk);
@@ -216,6 +234,7 @@ const char* _Nullable AMediaCodecInfo_getMediaType(const AMediaCodecInfo* _Nonnu
 
 int32_t AMediaCodecInfo_getMaxSupportedInstances(const AMediaCodecInfo* _Nonnull info)
 {
+	const auto lock = lockObject(info);
 	static const auto fp = (decltype(&AMediaCodecInfo_getMaxSupportedInstances))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
 	if (auto ndk = toNdk(info); ndk && fp)
 		return fp(ndk);
@@ -233,6 +252,7 @@ int32_t AMediaCodecInfo_getMaxSupportedInstances(const AMediaCodecInfo* _Nonnull
 
 int32_t AMediaCodecInfo_isFeatureSupported(const AMediaCodecInfo* _Nonnull info, const char* _Nonnull featureName)
 {
+	const auto lock = lockObject(info);
 	static const auto fp = (decltype(&AMediaCodecInfo_isFeatureSupported))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
 	if (auto ndk = toNdk(info); ndk && fp)
 		return fp(ndk, featureName);
@@ -249,6 +269,7 @@ int32_t AMediaCodecInfo_isFeatureSupported(const AMediaCodecInfo* _Nonnull info,
 
 int32_t AMediaCodecInfo_isFeatureRequired(const AMediaCodecInfo* _Nonnull info, const char* _Nonnull featureName)
 {
+	const auto lock = lockObject(info);
 	static const auto fp = (decltype(&AMediaCodecInfo_isFeatureRequired))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
 	if (auto ndk = toNdk(info); ndk && fp)
 		return fp(ndk, featureName);
@@ -265,6 +286,7 @@ int32_t AMediaCodecInfo_isFeatureRequired(const AMediaCodecInfo* _Nonnull info, 
 
 int32_t AMediaCodecInfo_isFormatSupported(const AMediaCodecInfo* _Nonnull info, const AMediaFormat* _Nonnull format)
 {
+	const auto lock = lockObject(info);
 	static const auto fp = (decltype(&AMediaCodecInfo_isFormatSupported))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
 	auto ndk_info = toNdk(info);
 	auto ndk_format = toNdk(format);
@@ -283,6 +305,7 @@ int32_t AMediaCodecInfo_isFormatSupported(const AMediaCodecInfo* _Nonnull info, 
 
 media_status_t AMediaCodecInfo_getAudioCapabilities(const AMediaCodecInfo* _Nonnull info, const ACodecAudioCapabilities* _Nullable * _Nonnull outAudioCaps)
 {
+	const auto lock = lockObject(info);
 	static const auto fp = (decltype(&AMediaCodecInfo_getAudioCapabilities))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
 	if (auto ndk = toNdk(info); ndk && fp) {
 		const ACodecAudioCapabilities* ndk_out = nullptr;
@@ -300,6 +323,10 @@ media_status_t AMediaCodecInfo_getAudioCapabilities(const AMediaCodecInfo* _Nonn
 	if (!caps)
 		return AMEDIA_ERROR_UNSUPPORTED;
 	auto obj = const_cast<AMediaCodecInfo*>(info);
+	if (obj->audio_caps_.jni_) {
+		*outAudioCaps = &obj->audio_caps_;
+		return AMEDIA_OK;
+	}
 	obj->audio_caps_.ndk_ = nullptr;
 	obj->audio_caps_.jni_ = caps.getAudioCapabilities();
 	if (!caps.error().empty() || !obj->audio_caps_.jni_)
@@ -311,6 +338,7 @@ media_status_t AMediaCodecInfo_getAudioCapabilities(const AMediaCodecInfo* _Nonn
 
 media_status_t AMediaCodecInfo_getVideoCapabilities(const AMediaCodecInfo* _Nonnull info, const ACodecVideoCapabilities* _Nullable * _Nonnull outVideoCaps)
 {
+	const auto lock = lockObject(info);
 	static const auto fp = (decltype(&AMediaCodecInfo_getVideoCapabilities))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
 	if (auto ndk = toNdk(info); ndk && fp) {
 		const ACodecVideoCapabilities* ndk_out = nullptr;
@@ -328,6 +356,10 @@ media_status_t AMediaCodecInfo_getVideoCapabilities(const AMediaCodecInfo* _Nonn
 	if (!caps)
 		return AMEDIA_ERROR_UNSUPPORTED;
 	auto obj = const_cast<AMediaCodecInfo*>(info);
+	if (obj->video_caps_.jni_) {
+		*outVideoCaps = &obj->video_caps_;
+		return AMEDIA_OK;
+	}
 	obj->video_caps_.ndk_ = nullptr;
 	obj->video_caps_.jni_ = caps.getVideoCapabilities();
 	if (!caps.error().empty() || !obj->video_caps_.jni_)
@@ -338,6 +370,7 @@ media_status_t AMediaCodecInfo_getVideoCapabilities(const AMediaCodecInfo* _Nonn
 
 media_status_t AMediaCodecInfo_getEncoderCapabilities(const AMediaCodecInfo* _Nonnull info, const ACodecEncoderCapabilities* _Nullable * _Nonnull outEncoderCaps)
 {
+	const auto lock = lockObject(info);
 	static const auto fp = (decltype(&AMediaCodecInfo_getEncoderCapabilities))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
 	if (auto ndk = toNdk(info); ndk && fp) {
 		const ACodecEncoderCapabilities* ndk_out = nullptr;
@@ -355,6 +388,10 @@ media_status_t AMediaCodecInfo_getEncoderCapabilities(const AMediaCodecInfo* _No
 	if (!caps)
 		return AMEDIA_ERROR_UNSUPPORTED;
 	auto obj = const_cast<AMediaCodecInfo*>(info);
+	if (obj->encoder_caps_.jni_) {
+		*outEncoderCaps = &obj->encoder_caps_;
+		return AMEDIA_OK;
+	}
 	obj->encoder_caps_.ndk_ = nullptr;
 	obj->encoder_caps_.jni_ = caps.getEncoderCapabilities();
 	if (!caps.error().empty() || !obj->encoder_caps_.jni_)
@@ -365,6 +402,7 @@ media_status_t AMediaCodecInfo_getEncoderCapabilities(const AMediaCodecInfo* _No
 
 media_status_t ACodecAudioCapabilities_getBitrateRange(const ACodecAudioCapabilities* _Nonnull audioCaps, AIntRange* _Nonnull outRange)
 {
+	const auto lock = lockObject(audioCaps);
 	static const auto fp = (decltype(&ACodecAudioCapabilities_getBitrateRange))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
 	if (auto ndk = toNdk(audioCaps); ndk && fp)
 		return fp(ndk, outRange);
@@ -382,6 +420,7 @@ media_status_t ACodecAudioCapabilities_getBitrateRange(const ACodecAudioCapabili
 
 media_status_t ACodecAudioCapabilities_getSupportedSampleRates(const ACodecAudioCapabilities* _Nonnull audioCaps, const int* _Nullable * _Nonnull outArrayPtr, size_t* _Nonnull outCount)
 {
+	const auto lock = lockObject(audioCaps);
 	static const auto fp = (decltype(&ACodecAudioCapabilities_getSupportedSampleRates))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
 	if (auto ndk = toNdk(audioCaps); ndk && fp)
 		return fp(ndk, outArrayPtr, outCount);
@@ -397,6 +436,7 @@ media_status_t ACodecAudioCapabilities_getSupportedSampleRates(const ACodecAudio
 
 media_status_t ACodecAudioCapabilities_getSupportedSampleRateRanges(const ACodecAudioCapabilities* _Nonnull audioCaps, const AIntRange* _Nullable * _Nonnull outArrayPtr, size_t* _Nonnull outCount)
 {
+	const auto lock = lockObject(audioCaps);
 	static const auto fp = (decltype(&ACodecAudioCapabilities_getSupportedSampleRateRanges))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
 	if (auto ndk = toNdk(audioCaps); ndk && fp)
 		return fp(ndk, outArrayPtr, outCount);
@@ -411,6 +451,7 @@ media_status_t ACodecAudioCapabilities_getSupportedSampleRateRanges(const ACodec
 
 int32_t ACodecAudioCapabilities_getMaxInputChannelCount(const ACodecAudioCapabilities* _Nonnull audioCaps)
 {
+	const auto lock = lockObject(audioCaps);
 	static const auto fp = (decltype(&ACodecAudioCapabilities_getMaxInputChannelCount))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
 	if (auto ndk = toNdk(audioCaps); ndk && fp)
 		return fp(ndk);
@@ -424,6 +465,7 @@ int32_t ACodecAudioCapabilities_getMaxInputChannelCount(const ACodecAudioCapabil
 
 int32_t ACodecAudioCapabilities_getMinInputChannelCount(const ACodecAudioCapabilities* _Nonnull audioCaps)
 {
+	const auto lock = lockObject(audioCaps);
 	static const auto fp = (decltype(&ACodecAudioCapabilities_getMinInputChannelCount))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
 	if (auto ndk = toNdk(audioCaps); ndk && fp)
 		return fp(ndk);
@@ -440,6 +482,7 @@ int32_t ACodecAudioCapabilities_getMinInputChannelCount(const ACodecAudioCapabil
 
 media_status_t ACodecAudioCapabilities_getInputChannelCountRanges(const ACodecAudioCapabilities* _Nonnull audioCaps, const AIntRange* _Nullable * _Nonnull outArrayPtr, size_t* _Nonnull outCount)
 {
+	const auto lock = lockObject(audioCaps);
 	static const auto fp = (decltype(&ACodecAudioCapabilities_getInputChannelCountRanges))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
 	if (auto ndk = toNdk(audioCaps); ndk && fp)
 		return fp(ndk, outArrayPtr, outCount);
@@ -454,6 +497,7 @@ media_status_t ACodecAudioCapabilities_getInputChannelCountRanges(const ACodecAu
 
 int32_t ACodecAudioCapabilities_isSampleRateSupported(const ACodecAudioCapabilities* _Nonnull audioCaps, int32_t sampleRate)
 {
+	const auto lock = lockObject(audioCaps);
 	static const auto fp = (decltype(&ACodecAudioCapabilities_isSampleRateSupported))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
 	if (auto ndk = toNdk(audioCaps); ndk && fp)
 		return fp(ndk, sampleRate);
@@ -467,6 +511,7 @@ int32_t ACodecAudioCapabilities_isSampleRateSupported(const ACodecAudioCapabilit
 
 media_status_t ACodecVideoCapabilities_getBitrateRange(const ACodecVideoCapabilities* _Nonnull videoCaps, AIntRange* _Nonnull outRange)
 {
+	const auto lock = lockObject(videoCaps);
 	static const auto fp = (decltype(&ACodecVideoCapabilities_getBitrateRange))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
 	if (auto ndk = toNdk(videoCaps); ndk && fp)
 		return fp(ndk, outRange);
@@ -484,6 +529,7 @@ media_status_t ACodecVideoCapabilities_getBitrateRange(const ACodecVideoCapabili
 
 media_status_t ACodecVideoCapabilities_getSupportedWidths(const ACodecVideoCapabilities* _Nonnull videoCaps, AIntRange* _Nonnull outRange)
 {
+	const auto lock = lockObject(videoCaps);
 	static const auto fp = (decltype(&ACodecVideoCapabilities_getSupportedWidths))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
 	if (auto ndk = toNdk(videoCaps); ndk && fp)
 		return fp(ndk, outRange);
@@ -501,6 +547,7 @@ media_status_t ACodecVideoCapabilities_getSupportedWidths(const ACodecVideoCapab
 
 media_status_t ACodecVideoCapabilities_getSupportedHeights(const ACodecVideoCapabilities* _Nonnull videoCaps, AIntRange* _Nonnull outRange)
 {
+	const auto lock = lockObject(videoCaps);
 	static const auto fp = (decltype(&ACodecVideoCapabilities_getSupportedHeights))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
 	if (auto ndk = toNdk(videoCaps); ndk && fp)
 		return fp(ndk, outRange);
@@ -518,6 +565,7 @@ media_status_t ACodecVideoCapabilities_getSupportedHeights(const ACodecVideoCapa
 
 int32_t ACodecVideoCapabilities_getWidthAlignment(const ACodecVideoCapabilities* _Nonnull videoCaps)
 {
+	const auto lock = lockObject(videoCaps);
 	static const auto fp = (decltype(&ACodecVideoCapabilities_getWidthAlignment))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
 	if (auto ndk = toNdk(videoCaps); ndk && fp)
 		return fp(ndk);
@@ -531,6 +579,7 @@ int32_t ACodecVideoCapabilities_getWidthAlignment(const ACodecVideoCapabilities*
 
 int32_t ACodecVideoCapabilities_getHeightAlignment(const ACodecVideoCapabilities* _Nonnull videoCaps)
 {
+	const auto lock = lockObject(videoCaps);
 	static const auto fp = (decltype(&ACodecVideoCapabilities_getHeightAlignment))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
 	if (auto ndk = toNdk(videoCaps); ndk && fp)
 		return fp(ndk);
@@ -544,6 +593,7 @@ int32_t ACodecVideoCapabilities_getHeightAlignment(const ACodecVideoCapabilities
 
 media_status_t ACodecVideoCapabilities_getSupportedFrameRates(const ACodecVideoCapabilities* _Nonnull videoCaps, AIntRange* _Nonnull outRange)
 {
+	const auto lock = lockObject(videoCaps);
 	static const auto fp = (decltype(&ACodecVideoCapabilities_getSupportedFrameRates))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
 	if (auto ndk = toNdk(videoCaps); ndk && fp)
 		return fp(ndk, outRange);
@@ -561,6 +611,7 @@ media_status_t ACodecVideoCapabilities_getSupportedFrameRates(const ACodecVideoC
 
 media_status_t ACodecVideoCapabilities_getSupportedWidthsFor(const ACodecVideoCapabilities* _Nonnull videoCaps, int32_t height, AIntRange* _Nonnull outRange)
 {
+	const auto lock = lockObject(videoCaps);
 	static const auto fp = (decltype(&ACodecVideoCapabilities_getSupportedWidthsFor))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
 	if (auto ndk = toNdk(videoCaps); ndk && fp)
 		return fp(ndk, height, outRange);
@@ -578,6 +629,7 @@ media_status_t ACodecVideoCapabilities_getSupportedWidthsFor(const ACodecVideoCa
 
 media_status_t ACodecVideoCapabilities_getSupportedHeightsFor(const ACodecVideoCapabilities* _Nonnull videoCaps, int32_t width, AIntRange* _Nonnull outRange)
 {
+	const auto lock = lockObject(videoCaps);
 	static const auto fp = (decltype(&ACodecVideoCapabilities_getSupportedHeightsFor))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
 	if (auto ndk = toNdk(videoCaps); ndk && fp)
 		return fp(ndk, width, outRange);
@@ -595,6 +647,7 @@ media_status_t ACodecVideoCapabilities_getSupportedHeightsFor(const ACodecVideoC
 
 media_status_t ACodecVideoCapabilities_getSupportedFrameRatesFor(const ACodecVideoCapabilities* _Nonnull videoCaps, int32_t width, int32_t height, ADoubleRange* _Nonnull outRange)
 {
+	const auto lock = lockObject(videoCaps);
 	static const auto fp = (decltype(&ACodecVideoCapabilities_getSupportedFrameRatesFor))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
 	if (auto ndk = toNdk(videoCaps); ndk && fp)
 		return fp(ndk, width, height, outRange);
@@ -612,6 +665,7 @@ media_status_t ACodecVideoCapabilities_getSupportedFrameRatesFor(const ACodecVid
 
 media_status_t ACodecVideoCapabilities_getAchievableFrameRatesFor(const ACodecVideoCapabilities* _Nonnull videoCaps, int32_t width, int32_t height, ADoubleRange* _Nonnull outRange)
 {
+	const auto lock = lockObject(videoCaps);
 	static const auto fp = (decltype(&ACodecVideoCapabilities_getAchievableFrameRatesFor))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
 	if (auto ndk = toNdk(videoCaps); ndk && fp)
 		return fp(ndk, width, height, outRange);
@@ -632,6 +686,7 @@ media_status_t ACodecVideoCapabilities_getAchievableFrameRatesFor(const ACodecVi
 
 int32_t ACodecVideoCapabilities_areSizeAndRateSupported(const ACodecVideoCapabilities* _Nonnull videoCaps, int32_t width, int32_t height, double frameRate)
 {
+	const auto lock = lockObject(videoCaps);
 	static const auto fp = (decltype(&ACodecVideoCapabilities_areSizeAndRateSupported))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
 	if (auto ndk = toNdk(videoCaps); ndk && fp)
 		return fp(ndk, width, height, frameRate);
@@ -645,6 +700,7 @@ int32_t ACodecVideoCapabilities_areSizeAndRateSupported(const ACodecVideoCapabil
 
 int32_t ACodecVideoCapabilities_isSizeSupported(const ACodecVideoCapabilities* _Nonnull videoCaps, int32_t width, int32_t height)
 {
+	const auto lock = lockObject(videoCaps);
 	static const auto fp = (decltype(&ACodecVideoCapabilities_isSizeSupported))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
 	if (auto ndk = toNdk(videoCaps); ndk && fp)
 		return fp(ndk, width, height);
@@ -658,6 +714,7 @@ int32_t ACodecVideoCapabilities_isSizeSupported(const ACodecVideoCapabilities* _
 
 media_status_t ACodecEncoderCapabilities_getQualityRange(const ACodecEncoderCapabilities* _Nonnull encoderCaps, AIntRange* _Nonnull outRange)
 {
+	const auto lock = lockObject(encoderCaps);
 	static const auto fp = (decltype(&ACodecEncoderCapabilities_getQualityRange))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
 	if (auto ndk = toNdk(encoderCaps); ndk && fp)
 		return fp(ndk, outRange);
@@ -678,6 +735,7 @@ media_status_t ACodecEncoderCapabilities_getQualityRange(const ACodecEncoderCapa
 
 media_status_t ACodecEncoderCapabilities_getComplexityRange(const ACodecEncoderCapabilities* _Nonnull encoderCaps, AIntRange* _Nonnull outRange)
 {
+	const auto lock = lockObject(encoderCaps);
 	static const auto fp = (decltype(&ACodecEncoderCapabilities_getComplexityRange))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
 	if (auto ndk = toNdk(encoderCaps); ndk && fp)
 		return fp(ndk, outRange);
@@ -695,6 +753,7 @@ media_status_t ACodecEncoderCapabilities_getComplexityRange(const ACodecEncoderC
 
 int32_t ACodecEncoderCapabilities_isBitrateModeSupported(const ACodecEncoderCapabilities* _Nonnull encoderCaps, ABitrateMode mode)
 {
+	const auto lock = lockObject(encoderCaps);
 	static const auto fp = (decltype(&ACodecEncoderCapabilities_isBitrateModeSupported))(mediandk_so() ? dlsym(mediandk_so(), __func__) : nullptr);
 	if (auto ndk = toNdk(encoderCaps); ndk && fp)
 		return fp(ndk, mode);

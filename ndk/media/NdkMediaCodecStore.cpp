@@ -106,9 +106,10 @@ static const AMediaCodecInfo* fromNdkCached(const AMediaCodecInfo* ndk)
 	static mutex mtx;
 	static map<const AMediaCodecInfo*, AMediaCodecInfo> cache;
 	[[maybe_unused]] const scoped_lock __(mtx);
-	auto& entry = cache[ndk];
-	entry.ndk_ = ndk;
-	return &entry;
+	auto [it, inserted] = cache.try_emplace(ndk);
+	if (inserted)
+		it->second.ndk_ = ndk;
+	return &it->second;
 }
 
 // Iterate through |infos|, optionally filtered by format mime, starting after
