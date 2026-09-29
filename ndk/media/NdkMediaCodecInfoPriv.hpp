@@ -1,6 +1,7 @@
 /*
  * AND: Android Native Dev in Modern C++ based on JMI
  * Copyright (C) 2018-2026 Wang Bin - wbsecg1@gmail.com
+ * AI participated
  * https://github.com/wang-bin/AND
  * https://github.com/wang-bin/JMI
  * MIT License
@@ -20,7 +21,6 @@ NDKMEDIA_NS_BEGIN
 struct ACodecAudioCapabilities {
 	const ACodecAudioCapabilities* ndk_ = nullptr;
 	jmi::android::media::MediaCodecInfo::AudioCapabilities jni_;
-	std::shared_ptr<std::recursive_mutex> mutex_ = std::make_shared<std::recursive_mutex>();
 	std::vector<int32_t> sample_rates_;
 	std::vector<AIntRange> sample_rate_ranges_;
 	std::vector<AIntRange> channel_count_ranges_;
@@ -33,7 +33,6 @@ ACodecAudioCapabilities* toNdk(const ACodecAudioCapabilities* obj);
 struct ACodecVideoCapabilities {
 	const ACodecVideoCapabilities* ndk_ = nullptr;
 	jmi::android::media::MediaCodecInfo::VideoCapabilities jni_;
-	std::shared_ptr<std::recursive_mutex> mutex_ = std::make_shared<std::recursive_mutex>();
 };
 
 ACodecVideoCapabilities* fromNdk(ACodecVideoCapabilities* obj);
@@ -42,7 +41,6 @@ ACodecVideoCapabilities* toNdk(const ACodecVideoCapabilities* obj);
 struct ACodecEncoderCapabilities {
 	const ACodecEncoderCapabilities* ndk_ = nullptr;
 	jmi::android::media::MediaCodecInfo::EncoderCapabilities jni_;
-	std::shared_ptr<std::recursive_mutex> mutex_ = std::make_shared<std::recursive_mutex>();
 };
 
 ACodecEncoderCapabilities* fromNdk(ACodecEncoderCapabilities* obj);
@@ -54,15 +52,13 @@ struct AMediaCodecInfo {
 	jmi::android::media::MediaCodecInfo::CodecCapabilities caps_;
 	std::string canonical_name_;
 	std::string media_type_;
-	// All child wrappers share this lock so a returned capabilities pointer can
-	// be queried while another thread probes the same codec. Keep the wrapper
-	// movable because Store keeps it in a vector.
-	std::shared_ptr<std::recursive_mutex> mutex_ = std::make_shared<std::recursive_mutex>();
+	// Keep the wrapper movable while serializing lazy cache initialization.
+	std::shared_ptr<std::mutex> cache_mutex_ = std::make_shared<std::mutex>();
 	//union {
-		ACodecAudioCapabilities audio_caps_{nullptr, {}, mutex_};
-		ACodecVideoCapabilities video_caps_{nullptr, {}, mutex_};
+		ACodecAudioCapabilities audio_caps_;
+		ACodecVideoCapabilities video_caps_;
 	//};
-	ACodecEncoderCapabilities encoder_caps_{nullptr, {}, mutex_};
+	ACodecEncoderCapabilities encoder_caps_;
 };
 
 AMediaCodecInfo* fromNdk(AMediaCodecInfo* obj);
