@@ -36,6 +36,8 @@ void AMediaFormat_setDouble(AMediaFormat*, const char* name, double value);// __
 void AMediaFormat_setSize(AMediaFormat*, const char* name, size_t value);// __INTRODUCED_IN(28);
 void AMediaFormat_setRect(AMediaFormat*, const char* name, int32_t left, int32_t top, int32_t right, int32_t bottom);// __INTRODUCED_IN(28);
 //#endif /* __ANDROID_API__ >= 28 */
+void AMediaFormat_clear(AMediaFormat*);// __INTRODUCED_IN(29);
+media_status_t AMediaFormat_copy(AMediaFormat *to, AMediaFormat *from);// __INTRODUCED_IN(29);
 
 // constexpr
 constexpr static const char* AMEDIAFORMAT_KEY_AAC_DRC_ATTENUATION_FACTOR = "aac-drc-cut-level"; // 21

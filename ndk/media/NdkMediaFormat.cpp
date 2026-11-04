@@ -12,6 +12,7 @@
 #include "android.media.MediaFormat.hpp"
 #include <dlfcn.h>
 #include <iostream>
+#include <utility>
 
 NDKMEDIA_NS_BEGIN
 using namespace jmi;
@@ -78,6 +79,71 @@ media_status_t AMediaFormat_delete(AMediaFormat* obj) {
     }
     delete obj;
     return ret;
+}
+
+void AMediaFormat_clear(AMediaFormat* obj)
+{
+    if (!obj)
+        return;
+    android::media::MediaFormat empty;
+    if (obj->jni_ && !empty.create()) {
+        clog << __func__ << " ERROR: " << empty.error() << endl;
+        return;
+    }
+    if (auto ndk = toNdk(obj)) {
+        void* so = mediandk_so();
+        static const auto clear = (decltype(&AMediaFormat_clear))dlsym(so, __func__);
+        if (clear) {
+            clear(ndk);
+        } else {
+// Older NDK backends have no clear API; replace the owned format inside the stable wrapper.
+            auto replacement = AMediaFormat_new();
+            if (!replacement) {
+                clog << __func__ << " ERROR: Cannot allocate empty format" << endl;
+                return;
+            }
+            std::swap(*obj, *replacement);
+            AMediaFormat_delete(replacement);
+            return;
+        }
+    }
+    obj->jni_ = std::move(empty);
+    obj->str_.clear();
+    obj->get_str_.clear();
+}
+
+media_status_t AMediaFormat_copy(AMediaFormat* to, AMediaFormat* from)
+{
+    if (!to || !from)
+        return AMEDIA_ERROR_INVALID_PARAMETER;
+    if (to == from)
+        return AMEDIA_OK;
+    android::media::MediaFormat copy;
+    if (from->jni_) {
+        if (__builtin_available(android 29, *)) {
+            if (!copy.create(from->jni_)) {
+                clog << __func__ << " ERROR: " << copy.error() << endl;
+                return AMEDIA_ERROR_UNKNOWN;
+            }
+        } else {
+            return AMEDIA_ERROR_UNSUPPORTED;
+        }
+    }
+    if (to->ndk_ || from->ndk_) {
+        if (!to->ndk_ || !from->ndk_)
+            return AMEDIA_ERROR_UNSUPPORTED;
+        static const auto fp = (decltype(&AMediaFormat_copy))dlsym(mediandk_so(), __func__);
+        if (!fp)
+            return AMEDIA_ERROR_UNSUPPORTED;
+        const auto ret = fp(to->ndk_, from->ndk_);
+        if (ret != AMEDIA_OK)
+            return ret;
+    }
+// Drop any stale Java representation when copying a native-only callback format.
+    to->jni_ = std::move(copy);
+    to->str_.clear();
+    to->get_str_.clear();
+    return AMEDIA_OK;
 }
 
 const char* AMediaFormat_toString(AMediaFormat* obj) {
